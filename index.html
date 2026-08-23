@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>The Reading Circle — Book Club</title>
+<title>Booked and Busy — Book Club</title>
 <style>
   :root{
     --paper:#faf5ee;
@@ -30,7 +30,6 @@
   }
   a{color:var(--plum)}
 
-  /* Header */
   header.site{
     text-align:center;
     padding:34px 20px 22px;
@@ -52,7 +51,6 @@
   }
   .tagline{color:var(--ink-soft);font-style:italic;font-family:var(--serif);font-size:15px}
 
-  /* Tabs */
   nav.tabs{
     max-width:980px;margin:0 auto;padding:18px 20px 0;
     display:flex;gap:8px;justify-content:center;flex-wrap:wrap;
@@ -68,6 +66,8 @@
     background:var(--plum);border-color:var(--plum);color:#fff;
     box-shadow:0 6px 16px -8px rgba(124,58,45,.7);
   }
+  .tab.admin-tab{display:none;border-color:var(--gold);color:var(--gold)}
+  .tab.admin-tab.active{background:var(--gold);border-color:var(--gold);color:#fff}
 
   main{max-width:980px;margin:0 auto;padding:26px 20px 80px}
   .panel{display:none;animation:fade .25s ease}
@@ -82,7 +82,6 @@
   }
   .badge-demo.show{display:flex}
 
-  /* Hero / current book */
   .hero{text-align:center;padding:10px 0 0}
   .hero .cover-wrap{display:flex;justify-content:center}
   .book-cover{
@@ -110,15 +109,14 @@
   .btn-primary:hover{background:var(--plum-dark);transform:translateY(-1px);box-shadow:0 10px 20px -10px rgba(124,58,45,.7)}
   .btn-ghost{background:#fff;color:var(--plum);border:1px solid var(--plum)}
   .btn-ghost:hover{background:var(--paper-2)}
+  .btn-sm{padding:7px 14px;font-size:13px;border-radius:8px}
 
-  /* Star component */
   .star{width:22px;height:22px;cursor:pointer;color:#d8c7a6;transition:color .1s, transform .1s}
   .star.on{color:var(--gold)}
   .star:hover{transform:scale(1.12)}
   .stars.static .star{cursor:default}
   .stars.static .star:hover{transform:none}
 
-  /* Past books */
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:26px}
   .past-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;text-align:center;
     transition:transform .15s, box-shadow .15s}
@@ -134,7 +132,6 @@
   .section-title::after{content:"";flex:1;height:1px;background:var(--line)}
   .empty{color:var(--ink-soft);font-style:italic;text-align:center;padding:40px 0;font-family:var(--serif)}
 
-  /* Rate panel */
   .rate-grid{display:grid;grid-template-columns:1fr;gap:28px}
   @media(min-width:760px){.rate-grid{grid-template-columns:240px 1fr}}
   .rate-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:26px}
@@ -143,7 +140,9 @@
   .field{margin-bottom:24px}
   .field label{display:block;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-soft);margin-bottom:10px}
   .progress-controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-  input[type=number]{width:84px;padding:9px 10px;border:1px solid var(--line);border-radius:8px;font-size:15px;font-family:var(--sans);background:#fff}
+  input[type=number],input[type=text],input[type=password]{padding:9px 12px;border:1px solid var(--line);border-radius:8px;font-size:15px;font-family:var(--sans);background:#fff}
+  input[type=number]{width:84px}
+  input[type=text],input[type=password]{width:100%}
   input[type=range]{flex:1;min-width:160px;accent-color:var(--plum)}
   .pct{font-weight:700;color:var(--plum);min-width:46px;text-align:right}
   .toggle-fin{display:inline-flex;align-items:center;gap:10px;cursor:pointer;user-select:none}
@@ -154,13 +153,57 @@
   .rate-side{text-align:center}
   .rate-side img{width:200px;max-width:60vw;aspect-ratio:2/3;border-radius:6px;box-shadow:0 18px 30px -16px rgba(0,0,0,.5);object-fit:cover}
 
+  /* Stats */
+  .stats-note{color:var(--ink-soft);font-size:13px;font-family:var(--serif);font-style:italic;margin:-8px 0 18px}
+  .stats-wrap{overflow-x:auto}
+  .stats-table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;font-size:14px}
+  .stats-table th,.stats-table td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+  .stats-table thead th{background:var(--paper-2);font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft)}
+  .stats-table tbody tr:last-child td{border-bottom:none}
+  .stats-table .name{font-family:var(--serif);font-weight:600}
+  .stats-table tr.you{background:#fff8ec}
+  .stats-table .num{font-weight:700;color:var(--plum)}
+  .star-s{color:var(--gold)}
+  .avatar{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;
+    background:var(--plum);color:#fff;font-weight:700;font-size:13px;margin-right:10px;vertical-align:middle}
+
+  /* Admin */
+  .gate{max-width:360px;margin:30px auto;text-align:center;background:#fff;border:1px solid var(--line);border-radius:14px;padding:32px}
+  .gate h2{font-family:var(--serif);margin:0 0 8px}
+  .gate p{color:var(--ink-soft);font-size:14px;margin:0 0 20px;font-family:var(--serif);font-style:italic}
+  .admin-bar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+  .admin-bar .hint{font-size:12.5px;color:var(--ink-soft);font-style:italic;font-family:var(--serif)}
+  .admin-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px;margin-bottom:18px}
+  .admin-card h3{font-family:var(--serif);margin:0 0 14px;display:flex;align-items:center;gap:8px}
+  .admin-card .tag{font-size:10px;text-transform:uppercase;letter-spacing:.08em;background:var(--plum);color:#fff;padding:2px 8px;border-radius:999px;font-weight:700}
+  .admin-card .tag.past{background:var(--ink-soft)}
+  .books-table{width:100%;border-collapse:collapse;font-size:13.5px}
+  .books-table th,.books-table td{padding:9px 8px;text-align:left;border-bottom:1px solid var(--line);vertical-align:middle}
+  .books-table th{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft)}
+  .books-table td .title{font-family:var(--serif);font-weight:600}
+  .books-table td .author{color:var(--ink-soft);font-size:12px;font-style:italic;font-family:var(--serif)}
+  .books-table td .isbn{color:var(--ink-soft);font-size:12px}
+  .books-table .mini{width:38px;aspect-ratio:2/3;object-fit:cover;border-radius:3px;box-shadow:0 4px 8px -4px rgba(0,0,0,.5);background:var(--paper-2)}
+  .row-btns{display:flex;gap:6px;justify-content:flex-end;white-space:nowrap}
+  .icon-btn{cursor:pointer;border:1px solid var(--line);background:#fff;border-radius:7px;padding:6px 9px;font-size:12px;color:var(--ink-soft);transition:all .12s}
+  .icon-btn:hover{border-color:var(--plum);color:var(--plum)}
+  .icon-btn.danger:hover{border-color:#b23b2e;color:#b23b2e}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .form-grid .full{grid-column:1/-1}
+  .form-grid .field{margin-bottom:0}
+  .form-grid .field label{font-size:11px}
+  .form-row-actions{display:flex;gap:10px;margin-top:14px;align-items:center;flex-wrap:wrap}
+  .lookup-status{font-size:12.5px;color:var(--ink-soft);min-height:16px}
+  .lookup-status.ok{color:#2f7d52}
+  .lookup-status.err{color:#b23b2e}
+
   footer{text-align:center;color:var(--ink-soft);font-size:12.5px;padding:30px 20px;border-top:1px solid var(--line);font-family:var(--serif)}
 </style>
 </head>
 <body>
 <header class="site">
   <div class="crest"><span class="dot"></span> Est. 2026 <span class="dot"></span></div>
-  <h1 class="club" id="club-name">The Reading Circle</h1>
+  <h1 class="club" id="club-name">Booked and Busy</h1>
   <div class="tagline">A shared shelf, read together.</div>
 </header>
 
@@ -168,12 +211,13 @@
   <button class="tab active" data-tab="current">📖 Current Book</button>
   <button class="tab" data-tab="past">📚 Past Books</button>
   <button class="tab" data-tab="rate">⭐ Rate &amp; Progress</button>
+  <button class="tab" data-tab="stats">📊 Reader Stats</button>
+  <button class="tab admin-tab" data-tab="admin">⚙️ Admin</button>
 </nav>
 
 <main>
   <div class="badge-demo" id="demo-badge">Demo mode — data is stored in your browser only. Add Supabase keys (top of the script) to share ratings with the group.</div>
 
-  <!-- CURRENT BOOK -->
   <section class="panel active" id="panel-current">
     <div class="hero">
       <div class="cover-wrap"><img class="book-cover" id="cur-cover" alt="Current book cover"></div>
@@ -189,13 +233,11 @@
     </div>
   </section>
 
-  <!-- PAST BOOKS -->
   <section class="panel" id="panel-past">
     <h2 class="section-title">Past reads</h2>
     <div class="grid" id="past-grid"></div>
   </section>
 
-  <!-- RATE -->
   <section class="panel" id="panel-rate">
     <div class="rate-grid">
       <div class="rate-side">
@@ -204,6 +246,11 @@
       <div class="rate-card">
         <h2 id="rate-title"></h2>
         <div class="author" id="rate-author"></div>
+
+        <div class="field">
+          <label>Your name (shown on the stats page)</label>
+          <input type="text" id="my-name" placeholder="e.g. Jake" />
+        </div>
 
         <div class="field">
           <label>Your rating</label>
@@ -233,6 +280,79 @@
       </div>
     </div>
   </section>
+
+  <section class="panel" id="panel-stats">
+    <h2 class="section-title">Reader stats</h2>
+    <p class="stats-note">Reading speed = pages read ÷ days from start to finish, averaged over each member’s finished books.</p>
+    <div class="stats-wrap">
+      <table class="stats-table">
+        <thead><tr><th>Member</th><th>Books rated</th><th>Avg rating</th><th>Finished</th><th>Avg reading speed</th></tr></thead>
+        <tbody id="stats-body"><tr><td colspan="5" class="empty">Open this tab to load…</td></tr></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-admin">
+    <div id="admin-gate" class="gate">
+      <h2>Admin access</h2>
+      <p>Enter the maintainer passcode to manage the book list.</p>
+      <input type="password" id="admin-pass" placeholder="Passcode" autocomplete="off">
+      <div class="err" id="gate-err" style="margin-top:12px"></div>
+      <button class="btn btn-primary" id="gate-btn" style="margin-top:16px;width:100%">Unlock</button>
+    </div>
+    <div id="admin-content" style="display:none">
+      <div class="admin-bar">
+        <h2 class="section-title" style="margin:0">Manage books</h2>
+        <button class="btn btn-ghost btn-sm" id="lock-btn">Lock</button>
+      </div>
+      <p class="hint" style="margin:0 0 18px;color:var(--ink-soft);font-size:12.5px;font-style:italic;font-family:var(--serif)">Edits are saved to Supabase (shared) when configured, or your browser in demo mode.</p>
+
+      <div class="admin-card">
+        <h3>➕ Add a book</h3>
+        <div class="form-grid">
+          <div class="field full">
+            <label>ISBN or OLID — type it then click Auto-fill</label>
+            <input type="text" id="f-isbn" placeholder="ISBN e.g. 9780525559474  or  OLID e.g. OL28401522M">
+            <button type="button" class="btn btn-ghost btn-sm" id="autofill-btn" style="margin-top:8px;width:100%">🔍 Auto-fill from ISBN / OLID</button>
+          </div>
+          <div class="field full">
+            <label>Title</label>
+            <input type="text" id="f-title" placeholder="Book title">
+          </div>
+          <div class="field full">
+            <label>Author</label>
+            <input type="text" id="f-author" placeholder="Author">
+          </div>
+          <div class="field">
+            <label>Total pages</label>
+            <input type="number" id="f-pages" min="1" inputmode="numeric" placeholder="304">
+          </div>
+          <div class="field">
+            <label>Cover image URL (overrides ISBN cover)</label>
+            <input type="text" id="f-cover" placeholder="https://… (optional)">
+          </div>
+        </div>
+        <div class="form-row-actions">
+          <select id="f-section" style="padding:9px 12px;border:1px solid var(--line);border-radius:8px;font-size:15px;font-family:var(--sans);background:#fff">
+            <option value="past">Add to Past Books</option>
+            <option value="current">Set as Current Book</option>
+          </select>
+          <button class="btn btn-primary btn-sm" id="add-btn">Add book</button>
+          <span class="lookup-status" id="lookup-status"></span>
+        </div>
+      </div>
+
+      <div class="admin-card">
+        <h3><span class="tag">Current</span> Current book</h3>
+        <div id="current-book-row"></div>
+      </div>
+
+      <div class="admin-card">
+        <h3><span class="tag past">Past</span> Past books</h3>
+        <div id="past-books-rows"></div>
+      </div>
+    </div>
+  </section>
 </main>
 
 <footer id="foot"></footer>
@@ -242,35 +362,41 @@
    EDIT THIS CONFIG
    ============================================================ */
 const CONFIG = {
-  clubName: "The Reading Circle",
+  clubName: "Booked and Busy",
 
   // Shared backend: create a free Supabase project, paste the URL + anon key.
   // Leave blank to run in local demo mode (data stored per-browser only).
   supabaseUrl: "",
   supabaseAnonKey: "",
 
-  // Table name created in Supabase (see README setup).
-  table: "book_club",
+  // Table names created in Supabase (see README setup).
+  ratingsTable: "book_club",
+  booksTable: "books",
 
-  currentBook: {
+  // Passcode to unlock the Admin tab. CHANGE THIS to something only you know.
+  adminPasscode: "bookclub2026",
+
+  // These are the DEFAULT books shown the first time the site loads, before
+  // any books are saved to Supabase/localStorage. After that, the saved book
+  // list is used instead — edit books via the Admin tab, not here.
+  defaultCurrentBook: {
     id: "the-midnight-library",
     title: "The Midnight Library",
     author: "Matt Haig",
     totalPages: 304,
-    // Optional: a real cover image URL. Leave "" to auto-generate a cover.
-    coverUrl: ""
+    coverUrl: "",
+    isbn: "9780525559474"
   },
-
-  pastBooks: [
-    { id: "tomorrow-tomorrow-tomorrow", title: "Tomorrow, and Tomorrow, and Tomorrow", author: "Gabrielle Zevin", totalPages: 416, coverUrl: "" },
-    { id: "lessons-in-chemistry",      title: "Lessons in Chemistry",                 author: "Bonnie Garmus",  totalPages: 390, coverUrl: "" },
-    { id: "the-seven-husbands",        title: "The Seven Husbands of Evelyn Hugo",     author: "Taylor Jenkins Reid", totalPages: 400, coverUrl: "" },
-    { id: "project-hail-mary",         title: "Project Hail Mary",                     author: "Andy Weir",      totalPages: 476, coverUrl: "" }
+  defaultPastBooks: [
+    { id: "tomorrow-tomorrow-tomorrow", title: "Tomorrow, and Tomorrow, and Tomorrow", author: "Gabrielle Zevin", totalPages: 416, coverUrl: "", isbn: "9780593321204" },
+    { id: "lessons-in-chemistry",      title: "Lessons in Chemistry",                 author: "Bonnie Garmus",  totalPages: 390, coverUrl: "", isbn: "9780525583600" },
+    { id: "the-seven-husbands",        title: "The Seven Husbands of Evelyn Hugo",     author: "Taylor Jenkins Reid", totalPages: 400, coverUrl: "", isbn: "9781501161933" },
+    { id: "project-hail-mary",         title: "Project Hail Mary",                     author: "Andy Weir",      totalPages: 476, coverUrl: "", isbn: "9780593135204" }
   ]
 };
 
 /* ============================================================ */
-/* --- Cover generator (works offline / in preview) ---------- */
+/* --- Cover generator (fallback when no real cover) --------- */
 const PALETTES = {
   "the-midnight-library":["#1b2a4a","#3a5a8c"],
   "tomorrow-tomorrow-tomorrow":["#6b2d5c","#b14e86"],
@@ -278,6 +404,12 @@ const PALETTES = {
   "the-seven-husbands":["#5a1a1a","#9c3a3a"],
   "project-hail-mary":["#2a2a2a","#5a8a3a"]
 };
+function paletteFor(book){
+  if(PALETTES[book.id]) return PALETTES[book.id];
+  let h=0; const s=(book.title||book.id||"x");
+  for(let i=0;i<s.length;i++) h=(h*31+s.charCodeAt(i))%360;
+  return ["hsl("+h+",45%,30%)","hsl("+((h+30)%360)+",45%,42%)"];
+}
 function wrapText(text, maxChars){
   const words = text.split(" "); const lines=[]; let line="";
   for(const w of words){
@@ -288,11 +420,10 @@ function wrapText(text, maxChars){
   return lines.slice(0,4);
 }
 function coverDataUri(book){
-  if(book.coverUrl) return book.coverUrl;
-  const p = PALETTES[book.id] || ["#4a3526","#7c3a2d"];
-  const titleLines = wrapText(book.title, book.title.length>22?16:20);
+  const p = paletteFor(book);
+  const titleLines = wrapText(book.title || "Untitled", (book.title||"").length>22?16:20);
   let ty = 180 - (titleLines.length-1)*22;
-  const tspans = titleLines.map(l=>{
+  const tspans = titleLines.map(function(l){
     const s = '<text x="150" y="'+ty+'" fill="#fff" font-family="Georgia,serif" font-size="26" text-anchor="middle" font-weight="bold">'+esc(l)+'</text>';
     ty += 38; return s;
   }).join("");
@@ -304,11 +435,70 @@ function coverDataUri(book){
     "<rect x='26' y='26' width='248' height='398' fill='none' stroke='rgba(255,255,255,.18)' stroke-width='1'/>"+
     tspans+
     "<line x1='110' y1='405' x2='190' y2='405' stroke='rgba(255,255,255,.6)' stroke-width='1.5'/>"+
-    "<text x='150' y='428' fill='rgba(255,255,255,.85)' font-family='sans-serif' font-size='14' text-anchor='middle'>"+esc(book.author)+"</text>"+
+    "<text x='150' y='428' fill='rgba(255,255,255,.85)' font-family='sans-serif' font-size='14' text-anchor='middle'>"+esc(book.author||"")+"</text>"+
     "</svg>";
   return "data:image/svg+xml;utf8,"+encodeURIComponent(svg);
 }
-function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+// Detect whether an identifier is an Open Library ID (OLID, e.g. OL28401522M)
+// or an ISBN (10/13 digits, optional trailing X). The /books/ pages on
+// openlibrary.org are indexed by OLID, so users often paste an OLID, not an
+// ISBN — both work, but the cover URL key must match.
+function idKind(v){
+  const s = String(v||"").trim();
+  if(/^OL\d+[A-Z]{1,3}$/i.test(s)) return "olid";
+  return "isbn"; // treat anything else as ISBN
+}
+function coverSrc(book){
+  if(!book) return coverDataUri({title:"?",author:""});
+  if(book.coverUrl) return book.coverUrl;
+  if(book.isbn){
+    const kind = idKind(book.isbn);
+    return "https://covers.openlibrary.org/b/"+kind+"/"+encodeURIComponent(book.isbn)+"-L.jpg?default=false";
+  }
+  return coverDataUri(book);
+}
+function hasRemoteCover(book){
+  return !!(book && (book.coverUrl || book.isbn));
+}
+function setCover(img, book){
+  img.removeAttribute("onerror");
+  if(hasRemoteCover(book)){
+    img.addEventListener("error", function onErr(){
+      img.removeEventListener("error", onErr);
+      img.src = coverDataUri(book);
+    }, {once:true});
+  }
+  img.src = coverSrc(book);
+}
+function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+
+/* ============================================================ */
+/* --- Open Library lookup (auto-fill from ISBN/OLID) --------- */
+// Fetches title/author/pages from the Open Library Books API and fills the
+// add-book form. Works on GitHub Pages (Open Library sends CORS headers).
+async function lookupByIsbn(isbn){
+  // Accept either an ISBN or an OLID (e.g. OL28401522M from a /books/ URL).
+  const kind = idKind(isbn);
+  const bibkey = kind+":"+encodeURIComponent(isbn);
+  const url = "https://openlibrary.org/api/books?bibkeys="+bibkey+"&format=json&jscmd=data";
+  const res = await fetch(url);
+  if(!res.ok) throw new Error("request failed");
+  const data = await res.json();
+  // the response is keyed by the bibkey; fall back to first entry if needed
+  const book = data[bibkey] || data[bibkey.replace(/%2F/g,"/")] || Object.values(data)[0];
+  if(!book) return null;
+  let author = "";
+  if(book.authors && book.authors.length) author = book.authors.map(function(a){return a.name;}).join(", ");
+  else if(book.by_statement) author = book.by_statement;
+  const pages = book.number_of_pages || (book.number_of_pages_median) || 0;
+  return {
+    title: book.title || "",
+    author: author,
+    pages: parseInt(pages) || 0,
+    // large cover URL straight from the API, if present
+    cover: (book.cover && (book.cover.large || book.cover.medium || book.cover.small)) || ""
+  };
+}
 
 /* ============================================================ */
 /* --- User identity ----------------------------------------- */
@@ -319,9 +509,18 @@ function getUserId(){
 }
 
 /* ============================================================ */
-/* --- Data layer: Supabase (REST) or local fallback --------- */
+/* --- Book store (Supabase or local) ------------------------ */
 const USE_SB = CONFIG.supabaseUrl && CONFIG.supabaseAnonKey;
 const uid = getUserId();
+const BOOKS_KEY = "bc_books_v1";
+
+function defaultBooks(){
+  return { currentBook: JSON.parse(JSON.stringify(CONFIG.defaultCurrentBook)),
+           pastBooks: JSON.parse(JSON.stringify(CONFIG.defaultPastBooks)) };
+}
+function slugify(title){
+  return String(title||"").toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"") || "book-"+Math.random().toString(36).slice(2,7);
+}
 
 function sbHeaders(extra){
   return Object.assign({
@@ -331,32 +530,80 @@ function sbHeaders(extra){
   }, extra||{});
 }
 
+async function loadBooks(){
+  if(USE_SB){
+    const url = CONFIG.supabaseUrl+"/rest/v1/"+CONFIG.booksTable+"?select=state&key=eq.primary";
+    const res = await fetch(url, {headers: sbHeaders()});
+    if(!res.ok) throw new Error("books fetch failed");
+    const arr = await res.json();
+    if(arr[0] && arr[0].state) return arr[0].state;
+    const d = defaultBooks();
+    await saveBooks(d);
+    return d;
+  }
+  try{
+    const raw = localStorage.getItem(BOOKS_KEY);
+    if(raw) return JSON.parse(raw);
+  }catch(e){}
+  const d = defaultBooks();
+  localStorage.setItem(BOOKS_KEY, JSON.stringify(d));
+  return d;
+}
+async function saveBooks(books){
+  if(USE_SB){
+    const body = { key:"primary", state: books, updated_at:new Date().toISOString() };
+    const url = CONFIG.supabaseUrl+"/rest/v1/"+CONFIG.booksTable+"?on_conflict=key";
+    const res = await fetch(url, {
+      method:"POST",
+      headers: sbHeaders({"Prefer":"resolution=merge-duplicates"}),
+      body: JSON.stringify(body)
+    });
+    if(!res.ok) throw new Error("books save failed");
+    return;
+  }
+  localStorage.setItem(BOOKS_KEY, JSON.stringify(books));
+}
+
+/* ============================================================ */
+/* --- Ratings store (Supabase or local) --------------------- */
 async function getAllForBook(bookId){
   if(USE_SB){
-    const url = CONFIG.supabaseUrl+"/rest/v1/"+CONFIG.table+"?book_id=eq."+encodeURIComponent(bookId)+"&select=user_id,rating,progress,finished";
+    const url = CONFIG.supabaseUrl+"/rest/v1/"+CONFIG.ratingsTable+"?book_id=eq."+encodeURIComponent(bookId)+"&select=user_id,rating,progress,finished";
     const res = await fetch(url, {headers: sbHeaders()});
     if(!res.ok) throw new Error("fetch failed");
     return await res.json();
   }
-  return localStore().allForBook(bookId);
+  return localRatings().allForBook(bookId);
 }
 async function getMyRecord(bookId){
   if(USE_SB){
-    const url = CONFIG.supabaseUrl+"/rest/v1/"+CONFIG.table+"?user_id=eq."+uid+"&book_id=eq."+encodeURIComponent(bookId)+"&select=rating,progress,finished";
+    const url = CONFIG.supabaseUrl+"/rest/v1/"+CONFIG.ratingsTable+"?user_id=eq."+uid+"&book_id=eq."+encodeURIComponent(bookId)+"&select=rating,progress,finished,started_at,name";
     const res = await fetch(url, {headers: sbHeaders()});
     if(!res.ok) throw new Error("fetch failed");
     const arr = await res.json();
     return arr[0] || null;
   }
-  return localStore().myRecord(bookId);
+  return localRatings().myRecord(bookId);
+}
+async function getAllRecords(){
+  if(USE_SB){
+    const url = CONFIG.supabaseUrl+"/rest/v1/"+CONFIG.ratingsTable+"?select=user_id,book_id,rating,progress,finished,started_at,updated_at,name";
+    const res = await fetch(url, {headers: sbHeaders()});
+    if(!res.ok) throw new Error("fetch failed");
+    return await res.json();
+  }
+  return localRatings().allRecords();
 }
 async function saveRecord(bookId, fields){
   if(USE_SB){
-    const body = Object.assign({user_id:uid, book_id:bookId, updated_at:new Date().toISOString()},
-      fields, {rating: fields.rating===undefined?null:fields.rating,
-               progress: fields.progress===undefined?null:fields.progress,
-               finished: fields.finished===undefined?false:fields.finished});
-    const url = CONFIG.supabaseUrl+"/rest/v1/"+CONFIG.table+"?on_conflict=user_id,book_id";
+    const body = Object.assign({
+      user_id:uid, book_id:bookId, updated_at:new Date().toISOString(),
+      rating: fields.rating===undefined?null:fields.rating,
+      progress: fields.progress===undefined?null:fields.progress,
+      finished: fields.finished===undefined?false:fields.finished,
+      name: fields.name===undefined?null:fields.name
+    }, fields.started_at ? {started_at: fields.started_at} : {});
+    const url = CONFIG.supabaseUrl+"/rest/v1/"+CONFIG.ratingsTable+"?on_conflict=user_id,book_id";
     const res = await fetch(url, {
       method:"POST",
       headers: sbHeaders({"Prefer":"resolution=merge-duplicates"}),
@@ -365,20 +612,21 @@ async function saveRecord(bookId, fields){
     if(!res.ok) throw new Error("save failed");
     return;
   }
-  localStore().save(bookId, fields);
+  localRatings().save(bookId, fields);
 }
 
-/* --- Local store (demo mode) with seeded group data -------- */
-function localStore(){
+/* --- Local ratings store (demo mode) with seeded group data - */
+function localRatings(){
   const KEY = "bc_local_data";
-  function load(){
-    try { return JSON.parse(localStorage.getItem(KEY)) || {}; }
-    catch(e){ return {}; }
-  }
+  function load(){ try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch(e){ return {}; } }
   function saveAll(d){ localStorage.setItem(KEY, JSON.stringify(d)); }
   function ensureSeed(d){
     if(d._seeded) return d;
-    const seedMembers = ["Ava","Marco","Priya","Theo","Lena"];
+    const DAY=86400000; const base=Date.now();
+    const members=["demo_Ava","demo_Marco","demo_Priya","demo_Theo","demo_Lena"];
+    const memberName={demo_Ava:"Ava",demo_Marco:"Marco",demo_Priya:"Priya",demo_Theo:"Theo",demo_Lena:"Lena"};
+    const memberSpeed={demo_Ava:95,demo_Marco:55,demo_Priya:70,demo_Theo:42,demo_Lena:58};
+    const memberOffset={};
     const ratings = {
       "the-midnight-library":[5,4,5,3,null],
       "tomorrow-tomorrow-tomorrow":[5,5,4,5,4],
@@ -386,11 +634,27 @@ function localStore(){
       "the-seven-husbands":[5,4,5,5,4],
       "project-hail-mary":[4,5,5,4,5]
     };
-    Object.keys(ratings).forEach(bookId=>{
-      ratings[bookId].forEach((r,i)=>{
-        const m = "demo_"+seedMembers[i];
+    const bp = {};
+    bp[CONFIG.defaultCurrentBook.id]=CONFIG.defaultCurrentBook.totalPages;
+    CONFIG.defaultPastBooks.forEach(function(b){ bp[b.id]=b.totalPages; });
+    Object.keys(ratings).forEach(function(bookId){
+      ratings[bookId].forEach(function(r,i){
+        const m = members[i];
         if(!d[bookId]) d[bookId]={};
-        d[bookId][m]={rating:r, progress: r?100:30, finished: !!r};
+        const finished = r!=null;
+        const progress = finished ? bp[bookId] : Math.round(bp[bookId]*0.3);
+        let startedAt=null, updatedAt=null;
+        if(finished){
+          const dur = Math.max(2, Math.ceil(bp[bookId]/memberSpeed[m]));
+          memberOffset[m] = (memberOffset[m]||0) + dur + 3;
+          const start = base - memberOffset[m]*DAY;
+          startedAt = new Date(start).toISOString();
+          updatedAt = new Date(start + dur*DAY).toISOString();
+        } else {
+          startedAt = new Date(base - 4*DAY).toISOString();
+          updatedAt = new Date(base - 1*DAY).toISOString();
+        }
+        d[bookId][m] = {rating:r, progress:progress, finished:finished, started_at:startedAt, updated_at:updatedAt, name:memberName[m]};
       });
     });
     d._seeded = true;
@@ -400,17 +664,30 @@ function localStore(){
     allForBook(bookId){
       const d = ensureSeed(load()); saveAll(d);
       const recs = d[bookId] || {};
-      return Object.entries(recs).map(([user_id,v])=>Object.assign({user_id}, v));
+      return Object.entries(recs).map(function(e){return Object.assign({user_id:e[0]}, e[1]);}).filter(function(r){return r.user_id!=="_seeded";});
     },
     myRecord(bookId){
       const d = ensureSeed(load()); saveAll(d);
       return (d[bookId] && d[bookId][uid]) || null;
     },
+    allRecords(){
+      const d = ensureSeed(load()); saveAll(d);
+      const out=[];
+      Object.keys(d).forEach(function(k){
+        if(k==="_seeded") return;
+        Object.entries(d[k]).forEach(function(e){ out.push(Object.assign({user_id:e[0], book_id:k}, e[1])); });
+      });
+      return out;
+    },
     save(bookId, fields){
       const d = ensureSeed(load());
       if(!d[bookId]) d[bookId]={};
-      const cur = d[bookId][uid] || {rating:null, progress:0, finished:false};
-      d[bookId][uid] = Object.assign({}, cur, fields);
+      const cur = d[bookId][uid] || {rating:null, progress:0, finished:false, started_at:null, updated_at:null, name:null};
+      const merged = Object.assign({}, cur, fields);
+      merged.updated_at = new Date().toISOString();
+      if(!merged.started_at && merged.progress>0) merged.started_at = merged.updated_at;
+      if(!merged.started_at && cur.started_at) merged.started_at = cur.started_at;
+      d[bookId][uid] = merged;
       saveAll(d);
     }
   };
@@ -419,10 +696,20 @@ function localStore(){
 /* ============================================================ */
 /* --- Aggregation ------------------------------------------- */
 function aggregate(records){
-  const rated = records.filter(r=>r.rating!=null && r.rating>0);
-  const avg = rated.length ? rated.reduce((s,r)=>s+r.rating,0)/rated.length : 0;
-  const finished = records.filter(r=>r.finished).length;
+  const rated = records.filter(function(r){return r.rating!=null && r.rating>0;});
+  const avg = rated.length ? rated.reduce(function(s,r){return s+r.rating;},0)/rated.length : 0;
+  const finished = records.filter(function(r){return r.finished;}).length;
   return { avg: avg, ratedCount: rated.length, total: records.length, finished: finished };
+}
+function daysBetween(a, b){
+  if(!a || !b) return 0;
+  const ms = new Date(b).getTime() - new Date(a).getTime();
+  return Math.max(1, ms/86400000);
+}
+function displayName(user_id, name){
+  if(name) return name;
+  if(user_id.indexOf("demo_")===0) return user_id.slice(5);
+  return "Reader";
 }
 
 /* ============================================================ */
@@ -432,8 +719,7 @@ function renderStarsStatic(el, value){
   const v = Math.round(value*2)/2;
   el.innerHTML = Array.from({length:5},function(_,i){
     const fill = (i+1) <= Math.floor(v);
-    const star = STAR.replace('class="star"', 'class="star'+(fill?' on':'')+'"');
-    return star;
+    return STAR.replace('class="star"', 'class="star'+(fill?' on':'')+'"');
   }).join("");
 }
 function renderStarsInput(el, value){
@@ -452,31 +738,39 @@ function renderStarsInput(el, value){
 
 /* ============================================================ */
 /* --- State + wiring ---------------------------------------- */
-const state = { myRating:0, myProgress:0, myFinished:false };
+const state = { myRating:0, myProgress:0, myFinished:false, myName:"", existingStartedAt:null };
+let BOOKS = null;
+let adminUnlocked = false;
 
 document.getElementById("club-name").textContent = CONFIG.clubName;
 document.title = CONFIG.clubName + " — Book Club";
-
 if(!USE_SB) document.getElementById("demo-badge").classList.add("show");
 
-// tab switching
 document.querySelectorAll(".tab").forEach(function(b){b.addEventListener("click", function(){activate(b.dataset.tab);});});
 document.querySelectorAll("[data-go]").forEach(function(b){b.addEventListener("click", function(){activate(b.dataset.go);});});
 function activate(name){
   document.querySelectorAll(".tab").forEach(function(b){b.classList.toggle("active", b.dataset.tab===name);});
   document.querySelectorAll(".panel").forEach(function(p){p.classList.toggle("active", p.id==="panel-"+name);});
   if(name==="rate") loadRatePanel();
+  if(name==="stats") renderStats();
+  if(name==="admin") maybeLoadAdmin();
 }
 
-// current book hero
-const cb = CONFIG.currentBook;
-document.getElementById("cur-cover").src = coverDataUri(cb);
-document.getElementById("cur-title").textContent = cb.title;
-document.getElementById("cur-author").textContent = "by " + cb.author;
-
-async function refreshCurrent(){
-  try{
-    const recs = await getAllForBook(cb.id);
+/* --- Current book + past rendering ------------------------- */
+function cb(){ return BOOKS && BOOKS.currentBook; }
+function refreshCurrent(){
+  const cur = cb();
+  setCover(document.getElementById("cur-cover"), cur);
+  document.getElementById("cur-title").textContent = cur ? cur.title : "No current book";
+  document.getElementById("cur-author").textContent = cur ? "by " + cur.author : "";
+  if(!cur){
+    document.getElementById("cur-stars").innerHTML="";
+    document.getElementById("cur-num").textContent="—";
+    document.getElementById("cur-count").textContent="· set a current book in Admin";
+    document.getElementById("cur-status").textContent="";
+    return;
+  }
+  getAllForBook(cur.id).then(function(recs){
     const a = aggregate(recs);
     renderStarsStatic(document.getElementById("cur-stars"), a.avg);
     document.getElementById("cur-num").textContent = a.avg ? a.avg.toFixed(1) : "—";
@@ -485,27 +779,26 @@ async function refreshCurrent(){
     let pill = "Not started yet";
     if(my){
       if(my.finished) pill = "✓ You’ve finished";
-      else if(my.progress) pill = "You’re on page "+my.progress+" of "+cb.totalPages+" ("+Math.round(my.progress/cb.totalPages*100)+"%)";
+      else if(my.progress) pill = "You’re on page "+my.progress+" of "+cur.totalPages+" ("+Math.round(my.progress/cur.totalPages*100)+"%)";
       else if(my.rating) pill = "You rated this book";
     }
     document.getElementById("cur-status").textContent = pill;
-  }catch(e){
-    document.getElementById("cur-count").textContent = "· unavailable";
-  }
+  }).catch(function(){ document.getElementById("cur-count").textContent = "· unavailable"; });
 }
-
-// past books
 function renderPast(){
   const grid = document.getElementById("past-grid");
   grid.innerHTML="";
-  CONFIG.pastBooks.forEach(async function(b){
+  const list = (BOOKS && BOOKS.pastBooks) || [];
+  if(!list.length){ grid.innerHTML='<div class="empty">No past books yet.</div>'; return; }
+  list.forEach(async function(b){
     const card = document.createElement("div");
     card.className="past-card";
-    card.innerHTML = '<img src="'+coverDataUri(b)+'" alt="'+esc(b.title)+' cover">'+
+    card.innerHTML = '<img alt="'+esc(b.title)+' cover">'+
       '<h3>'+esc(b.title)+'</h3>'+
       '<div class="author">'+esc(b.author)+'</div>'+
       '<div class="grp"><span class="stars static" data-stars></span><span class="num"></span> <span class="count"></span></div>';
     grid.appendChild(card);
+    setCover(card.querySelector("img"), b);
     try{
       const recs = await getAllForBook(b.id);
       const a = aggregate(recs);
@@ -516,67 +809,281 @@ function renderPast(){
   });
 }
 
-// rate panel
+/* --- Rate panel -------------------------------------------- */
 function loadRatePanel(){
-  document.getElementById("rate-cover").src = coverDataUri(cb);
-  document.getElementById("rate-title").textContent = cb.title;
-  document.getElementById("rate-author").textContent = "by " + cb.author;
-  document.getElementById("pages-of").textContent = "/ "+cb.totalPages+" pages";
-  getMyRecord(cb.id).then(function(my){
+  const cur = cb();
+  setCover(document.getElementById("rate-cover"), cur);
+  document.getElementById("rate-title").textContent = cur ? cur.title : "No current book";
+  document.getElementById("rate-author").textContent = cur ? "by " + cur.author : "";
+  document.getElementById("pages-of").textContent = cur ? "/ "+cur.totalPages+" pages" : "/ — pages";
+  if(!cur){ document.getElementById("rate-stars").innerHTML=""; return; }
+  getMyRecord(cur.id).then(function(my){
     state.myRating = (my && my.rating) || 0;
     state.myProgress = (my && my.progress) || 0;
     state.myFinished = !!(my && my.finished);
+    state.myName = (my && my.name) || "";
+    state.existingStartedAt = (my && my.started_at) || null;
+    document.getElementById("my-name").value = state.myName;
     document.getElementById("pages").value = state.myProgress || "";
-    document.getElementById("range").value = Math.min(100, Math.round(state.myProgress/cb.totalPages*100));
+    document.getElementById("range").value = Math.min(100, Math.round(state.myProgress/cur.totalPages*100));
     document.getElementById("finished").checked = state.myFinished;
     renderStarsInput(document.getElementById("rate-stars"), state.myRating);
     updatePct();
   }).catch(function(){ renderStarsInput(document.getElementById("rate-stars"), 0); });
 }
 function updatePct(){
+  const cur = cb(); if(!cur) return;
   const p = parseInt(document.getElementById("pages").value)||0;
-  const pct = Math.min(100, Math.round(p/cb.totalPages*100));
+  const pct = Math.min(100, Math.round(p/cur.totalPages*100));
   document.getElementById("pct").textContent = pct+"%";
   document.getElementById("range").value = pct;
-  if(p>=cb.totalPages){ document.getElementById("finished").checked = true; state.myFinished = true; }
+  if(p>=cur.totalPages){ document.getElementById("finished").checked = true; state.myFinished = true; }
 }
 document.getElementById("pages").addEventListener("input", updatePct);
 document.getElementById("range").addEventListener("input", function(){
+  const cur = cb(); if(!cur) return;
   const pct = parseInt(document.getElementById("range").value);
-  const p = Math.round(pct/100*cb.totalPages);
-  document.getElementById("pages").value = p;
+  document.getElementById("pages").value = Math.round(pct/100*cur.totalPages);
   document.getElementById("pct").textContent = pct+"%";
 });
 document.getElementById("finished").addEventListener("change", function(e){ state.myFinished = e.target.checked; });
 
 async function doSave(forceFinished){
+  const cur = cb(); if(!cur) return;
   const errEl = document.getElementById("err"); errEl.textContent="";
   const p = parseInt(document.getElementById("pages").value)||0;
-  if(p<0||p>cb.totalPages){ errEl.textContent = "Pages must be between 0 and "+cb.totalPages+"."; return; }
+  if(p<0||p>cur.totalPages){ errEl.textContent = "Pages must be between 0 and "+cur.totalPages+"."; return; }
   const finished = forceFinished!==undefined ? forceFinished : document.getElementById("finished").checked;
   state.myFinished = finished;
   document.getElementById("finished").checked = finished;
-  const fields = {
-    rating: state.myRating || null,
-    progress: finished ? cb.totalPages : p,
-    finished: finished
-  };
-  if(finished){ document.getElementById("pages").value = cb.totalPages; updatePct(); }
+  const name = document.getElementById("my-name").value.trim();
+  state.myName = name;
+  const now = new Date().toISOString();
+  const setStartedAt = (!state.existingStartedAt && p>0) ? now : null;
+  const fields = { rating: state.myRating || null, progress: finished ? cur.totalPages : p, finished: finished, name: name };
+  if(setStartedAt) fields.started_at = setStartedAt;
+  if(finished){ document.getElementById("pages").value = cur.totalPages; updatePct(); }
   try{
-    await saveRecord(cb.id, fields);
+    await saveRecord(cur.id, fields);
+    state.existingStartedAt = state.existingStartedAt || setStartedAt;
     document.getElementById("saved").classList.add("show");
     setTimeout(function(){document.getElementById("saved").classList.remove("show");}, 2000);
     refreshCurrent();
-  }catch(e){
-    errEl.textContent = "Could not save. Check your Supabase setup and connection.";
-  }
+    renderStats();
+  }catch(e){ errEl.textContent = "Could not save. Check your Supabase setup and connection."; }
 }
 document.getElementById("save").addEventListener("click", function(){doSave();});
 document.getElementById("finished-btn").addEventListener("click", function(){doSave(true);});
 
-// init
-refreshCurrent();
-renderPast();
+/* --- Reader stats ------------------------------------------ */
+async function renderStats(){
+  const el = document.getElementById("stats-body");
+  el.innerHTML = '<tr><td colspan="5" class="empty">Loading…</td></tr>';
+  try{
+    const recs = await getAllRecords();
+    const bp = {};
+    if(BOOKS && BOOKS.currentBook) bp[BOOKS.currentBook.id]=BOOKS.currentBook.totalPages;
+    (BOOKS && BOOKS.pastBooks || []).forEach(function(b){ bp[b.id]=b.totalPages; });
+    const byUser = {};
+    recs.forEach(function(r){
+      if(!byUser[r.user_id]) byUser[r.user_id]={name:null, nameUpdated:0, ratings:[], speeds:[]};
+      const u = byUser[r.user_id];
+      const tu = new Date(r.updated_at||0).getTime();
+      if(r.name && tu>u.nameUpdated){ u.name=r.name; u.nameUpdated=tu; }
+      if(r.rating!=null && r.rating>0) u.ratings.push(r.rating);
+      if(r.finished && bp[r.book_id]){ u.speeds.push(bp[r.book_id]/daysBetween(r.started_at, r.updated_at)); }
+    });
+    const rows = Object.keys(byUser).map(function(uid2){
+      const u = byUser[uid2];
+      const avgR = u.ratings.length ? u.ratings.reduce(function(s,x){return s+x;},0)/u.ratings.length : null;
+      const avgS = u.speeds.length ? u.speeds.reduce(function(s,x){return s+x;},0)/u.speeds.length : null;
+      return {uid:uid2, name:u.name, avgR:avgR, avgS:avgS, ratedCount:u.ratings.length, finishedCount:u.speeds.length};
+    });
+    rows.sort(function(a,b){return (b.avgS||0)-(a.avgS||0);});
+    if(!rows.length){ el.innerHTML='<tr><td colspan="5" class="empty">No readers yet. Rate a book to appear here.</td></tr>'; return; }
+    el.innerHTML = rows.map(function(r){
+      const name = displayName(r.uid, r.name) + (r.uid===uid ? " (you)" : "");
+      const initial = (name.charAt(0)||"?").toUpperCase();
+      return '<tr class="'+(r.uid===uid?'you':'')+'">'+
+        '<td class="name"><span class="avatar">'+initial+'</span>'+esc(name)+'</td>'+
+        '<td>'+r.ratedCount+'</td>'+
+        '<td>'+(r.avgR!=null ? r.avgR.toFixed(1)+' <span class="star-s">★</span>' : '—')+'</td>'+
+        '<td>'+r.finishedCount+'</td>'+
+        '<td class="num">'+(r.avgS!=null ? Math.round(r.avgS)+' pp/day' : '—')+'</td>'+
+      '</tr>';
+    }).join("");
+  }catch(e){ el.innerHTML='<tr><td colspan="5" class="empty">Could not load stats.</td></tr>'; }
+}
+
+/* ============================================================ */
+/* --- Admin panel ------------------------------------------- */
+function maybeLoadAdmin(){
+  if(adminUnlocked){ showAdminContent(); renderAdminTables(); }
+}
+document.getElementById("gate-btn").addEventListener("click", tryUnlock);
+document.getElementById("admin-pass").addEventListener("keydown", function(e){ if(e.key==="Enter") tryUnlock(); });
+document.getElementById("lock-btn").addEventListener("click", function(){
+  adminUnlocked=false;
+  document.querySelector('.tab[data-tab="admin"]').classList.remove("active");
+  document.querySelector('.tab[data-tab="current"]').classList.add("active");
+  document.querySelectorAll(".panel").forEach(function(p){p.classList.toggle("active", p.id==="panel-current");});
+  document.getElementById("admin-gate").style.display="block";
+  document.getElementById("admin-content").style.display="none";
+  document.getElementById("admin-pass").value="";
+});
+function tryUnlock(){
+  const val = document.getElementById("admin-pass").value;
+  const err = document.getElementById("gate-err");
+  if(val === CONFIG.adminPasscode){
+    adminUnlocked = true;
+    document.querySelector('.tab.admin-tab').style.display="inline-block";
+    showAdminContent();
+    renderAdminTables();
+  } else {
+    err.textContent = "Incorrect passcode.";
+  }
+}
+function showAdminContent(){
+  document.getElementById("admin-gate").style.display="none";
+  document.getElementById("admin-content").style.display="block";
+}
+
+function bookRow(book, isCurrent){
+  if(!book) return '<div class="empty">None set. Add a book and choose “Set as Current Book”.</div>';
+  return '<table class="books-table"><tr>'+
+    '<td><img class="mini" alt=""></td>'+
+    '<td><div class="title">'+esc(book.title)+'</div><div class="author">'+esc(book.author)+'</div>'+
+      '<div class="isbn">ISBN '+(book.isbn?esc(book.isbn):"—")+' · '+book.totalPages+' pp</div></td>'+
+    '<td class="row-btns">'+
+      '<button class="icon-btn" data-edit="'+(isCurrent?"current":book.id)+'">Edit</button>'+
+      '<button class="icon-btn danger" data-del="'+(isCurrent?"current":book.id)+'">Delete</button>'+
+    '</td>'+
+  '</tr></table>';
+}
+function renderAdminTables(){
+  document.getElementById("current-book-row").innerHTML = bookRow(BOOKS && BOOKS.currentBook, true);
+  const past = (BOOKS && BOOKS.pastBooks) || [];
+  document.getElementById("past-books-rows").innerHTML = past.length
+    ? '<table class="books-table">'+past.map(function(b){return bookRow(b,false).replace(/<table class="books-table">|<\/table>/g,"");}).join("")+'</table>'
+    : '<div class="empty">No past books yet.</div>';
+  document.querySelectorAll("[data-edit]").forEach(function(btn){
+    btn.addEventListener("click", function(){ openEdit(btn.getAttribute("data-edit")); });
+  });
+  document.querySelectorAll("[data-del]").forEach(function(btn){
+    btn.addEventListener("click", function(){ deleteBook(btn.getAttribute("data-del")); });
+  });
+  document.querySelectorAll("#admin-content .books-table .mini").forEach(function(img, i){
+    const isCur = i===0 && BOOKS.currentBook;
+    const book = isCur ? BOOKS.currentBook : (BOOKS.pastBooks[i - (BOOKS.currentBook?1:0)]);
+    setCover(img, book);
+  });
+}
+
+/* --- ISBN/OLID auto-fill ----------------------------------- */
+document.getElementById("autofill-btn").addEventListener("click", async function(){
+  const isbn = document.getElementById("f-isbn").value.trim();
+  const status = document.getElementById("lookup-status");
+  if(!isbn){ status.className="lookup-status err"; status.textContent="Enter an ISBN or OLID first."; return; }
+  status.className="lookup-status"; status.textContent="Looking up…";
+  try{
+    const info = await lookupByIsbn(isbn);
+    if(!info){ status.className="lookup-status err"; status.textContent="No book found for that ISBN/OLID."; return; }
+    if(info.title && !document.getElementById("f-title").value) document.getElementById("f-title").value = info.title;
+    if(info.author && !document.getElementById("f-author").value) document.getElementById("f-author").value = info.author;
+    if(info.pages && !document.getElementById("f-pages").value) document.getElementById("f-pages").value = info.pages;
+    if(info.cover && !document.getElementById("f-cover").value) document.getElementById("f-cover").value = info.cover;
+    status.className="lookup-status ok"; status.textContent="Filled ✓ — review and click Add book.";
+  }catch(e){
+    status.className="lookup-status err"; status.textContent="Lookup failed (check connection).";
+  }
+});
+
+/* --- Add book ---------------------------------------------- */
+document.getElementById("add-btn").addEventListener("click", function(){
+  const title = document.getElementById("f-title").value.trim();
+  const author = document.getElementById("f-author").value.trim();
+  const isbn = document.getElementById("f-isbn").value.trim();
+  const pages = parseInt(document.getElementById("f-pages").value)||0;
+  const coverUrl = document.getElementById("f-cover").value.trim();
+  const section = document.getElementById("f-section").value;
+  const status = document.getElementById("lookup-status");
+  status.className="lookup-status"; status.textContent="";
+  if(!title){ status.className="lookup-status err"; status.textContent="Title is required."; return; }
+  if(!pages || pages<1){ status.className="lookup-status err"; status.textContent="Enter a valid page count."; return; }
+  const book = { id: slugify(title)+"-"+Math.random().toString(36).slice(2,5), title:title, author:author, isbn:isbn, totalPages:pages, coverUrl:coverUrl };
+  addOrUpdateBook(book, section, function(ok){
+    if(ok){
+      status.className="lookup-status ok"; status.textContent="Added ✓";
+      document.getElementById("f-title").value=""; document.getElementById("f-author").value="";
+      document.getElementById("f-isbn").value=""; document.getElementById("f-pages").value=""; document.getElementById("f-cover").value="";
+      document.getElementById("add-btn").textContent="Add book";
+      renderAdminTables(); refreshCurrent(); renderPast();
+    } else {
+      status.className="lookup-status err"; status.textContent="Could not save. Try again.";
+    }
+  });
+});
+
+/* --- Edit / delete ----------------------------------------- */
+let editingKey = null;
+function openEdit(key){
+  let book = null;
+  if(key==="current"){ book = BOOKS.currentBook; editingKey="current"; }
+  else { book = (BOOKS.pastBooks||[]).find(function(b){return b.id===key;}); editingKey=key; }
+  if(!book) return;
+  document.getElementById("f-title").value=book.title||"";
+  document.getElementById("f-author").value=book.author||"";
+  document.getElementById("f-isbn").value=book.isbn||"";
+  document.getElementById("f-pages").value=book.totalPages||"";
+  document.getElementById("f-cover").value=book.coverUrl||"";
+  document.getElementById("f-section").value = (key==="current") ? "current" : "past";
+  document.getElementById("add-btn").textContent="Save changes";
+  document.getElementById("lookup-status").textContent="Editing — changes update this book.";
+  document.getElementById("lookup-status").className="lookup-status";
+  window.scrollTo({top: document.querySelector(".admin-card").offsetTop - 20, behavior:"smooth"});
+}
+function addOrUpdateBook(book, section, cb){
+  if(editingKey){
+    if(editingKey==="current"){
+      if(section==="current"){ book.id = BOOKS.currentBook.id; BOOKS.currentBook = book; }
+      else { deleteBook("current"); BOOKS.pastBooks.unshift(book); }
+    } else {
+      const idx = BOOKS.pastBooks.findIndex(function(b){return b.id===editingKey;});
+      if(idx>=0){
+        if(section==="current"){ BOOKS.pastBooks.splice(idx,1); book.id = BOOKS.currentBook ? BOOKS.currentBook.id : book.id; BOOKS.currentBook = book; }
+        else { book.id = BOOKS.pastBooks[idx].id; BOOKS.pastBooks[idx] = book; }
+      }
+    }
+    editingKey = null;
+    document.getElementById("add-btn").textContent="Add book";
+  } else {
+    if(section==="current"){
+      if(BOOKS.currentBook){ BOOKS.pastBooks.unshift(BOOKS.currentBook); }
+      BOOKS.currentBook = book;
+    } else {
+      BOOKS.pastBooks.unshift(book);
+    }
+  }
+  saveBooks(BOOKS).then(function(){ cb(true); }).catch(function(){ cb(false); });
+}
+function deleteBook(key){
+  if(!confirm("Delete this book? Its saved ratings stay but won't show until re-added.")) return;
+  if(key==="current"){ BOOKS.currentBook = null; }
+  else { const idx = BOOKS.pastBooks.findIndex(function(b){return b.id===key;}); if(idx>=0) BOOKS.pastBooks.splice(idx,1); }
+  if(editingKey===key){ editingKey=null; document.getElementById("add-btn").textContent="Add book"; }
+  saveBooks(BOOKS).then(function(){ renderAdminTables(); refreshCurrent(); renderPast(); });
+}
+
+/* ============================================================ */
+/* --- Boot --------------------------------------------------- */
+(async function boot(){
+  try{ BOOKS = await loadBooks(); }
+  catch(e){ BOOKS = defaultBooks(); }
+  if(!BOOKS.pastBooks) BOOKS.pastBooks=[];
+  if(!BOOKS.currentBook) BOOKS.currentBook=null;
+  refreshCurrent();
+  renderPast();
+})();
 document.getElementById("foot").textContent = CONFIG.clubName+" · hosted on GitHub Pages";
 </script>
 </body>

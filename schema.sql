@@ -1,3 +1,4 @@
+-- Ratings / progress (one row per member per book)
 create table book_club (
   id bigint generated always as identity primary key,
   user_id text not null,
@@ -15,6 +16,7 @@ create policy "anyone can read"  on book_club for select using (true);
 create policy "anyone can insert" on book_club for insert with check (true);
 create policy "anyone can update" on book_club for update using (true) with check (true);
 
+-- Book list (one JSON row holding the current + past books)
 create table books (
   key text primary key default 'primary',
   state jsonb not null,

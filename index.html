@@ -1,0 +1,583 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>The Reading Circle — Book Club</title>
+<style>
+  :root{
+    --paper:#faf5ee;
+    --paper-2:#f3ebde;
+    --ink:#2b2622;
+    --ink-soft:#6b625a;
+    --plum:#7c3a2d;
+    --plum-dark:#5e2a20;
+    --gold:#b8893b;
+    --line:#e3d8c6;
+    --serif:Georgia,"Times New Roman",serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:var(--sans);
+    color:var(--ink);
+    background:
+      radial-gradient(1200px 600px at 50% -10%, #fff8ec, transparent 60%),
+      var(--paper);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--plum)}
+
+  /* Header */
+  header.site{
+    text-align:center;
+    padding:34px 20px 22px;
+    border-bottom:1px solid var(--line);
+    background:linear-gradient(180deg,#fffaf1, transparent);
+  }
+  .crest{
+    display:inline-flex;align-items:center;gap:10px;
+    font-family:var(--serif);color:var(--plum);
+    letter-spacing:.18em;font-size:12px;text-transform:uppercase;font-weight:bold;
+  }
+  .crest .dot{width:6px;height:6px;border-radius:50%;background:var(--gold)}
+  h1.club{
+    font-family:var(--serif);
+    font-size:clamp(30px,5vw,52px);
+    margin:8px 0 4px;
+    color:var(--ink);
+    letter-spacing:.5px;
+  }
+  .tagline{color:var(--ink-soft);font-style:italic;font-family:var(--serif);font-size:15px}
+
+  /* Tabs */
+  nav.tabs{
+    max-width:980px;margin:0 auto;padding:18px 20px 0;
+    display:flex;gap:8px;justify-content:center;flex-wrap:wrap;
+  }
+  .tab{
+    appearance:none;border:1px solid var(--line);background:#fff;
+    padding:10px 18px;border-radius:999px;cursor:pointer;
+    font-size:14px;color:var(--ink-soft);font-weight:600;
+    transition:all .15s; font-family:var(--sans);
+  }
+  .tab:hover{border-color:var(--gold);color:var(--ink)}
+  .tab.active{
+    background:var(--plum);border-color:var(--plum);color:#fff;
+    box-shadow:0 6px 16px -8px rgba(124,58,45,.7);
+  }
+
+  main{max-width:980px;margin:0 auto;padding:26px 20px 80px}
+  .panel{display:none;animation:fade .25s ease}
+  .panel.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  .badge-demo{
+    display:none;align-items:center;gap:8px;justify-content:center;
+    margin:0 auto 18px;max-width:fit-content;
+    background:#fff5e6;border:1px solid #f0d9a8;color:#8a6310;
+    padding:6px 14px;border-radius:999px;font-size:12.5px;font-weight:600;
+  }
+  .badge-demo.show{display:flex}
+
+  /* Hero / current book */
+  .hero{text-align:center;padding:10px 0 0}
+  .hero .cover-wrap{display:flex;justify-content:center}
+  .book-cover{
+    width:230px;max-width:70vw;aspect-ratio:2/3;border-radius:6px;
+    box-shadow:0 24px 40px -18px rgba(40,30,20,.55), 0 2px 6px rgba(0,0,0,.12);
+    background:var(--paper-2);object-fit:cover;
+    transition:transform .25s;
+  }
+  .book-cover:hover{transform:translateY(-4px)}
+  .hero h2{font-family:var(--serif);font-size:clamp(24px,3.4vw,34px);margin:22px 0 4px}
+  .hero .author{color:var(--ink-soft);font-style:italic;font-family:var(--serif);font-size:17px;margin-bottom:18px}
+  .rating-row{display:inline-flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--line);
+    padding:8px 16px;border-radius:999px;box-shadow:0 6px 16px -10px rgba(0,0,0,.2)}
+  .rating-row .stars{display:inline-flex;gap:2px}
+  .rating-row .num{font-weight:700;color:var(--ink)}
+  .rating-row .count{color:var(--ink-soft);font-size:13px}
+  .status-pill{margin-top:14px;display:inline-block;background:var(--paper-2);border:1px solid var(--line);
+    padding:6px 14px;border-radius:999px;font-size:13px;color:var(--ink-soft)}
+  .cta-rate{margin-top:22px}
+  .btn{
+    appearance:none;cursor:pointer;border:none;font-family:var(--sans);font-weight:700;
+    padding:12px 24px;border-radius:10px;font-size:15px;transition:transform .12s, box-shadow .15s;
+  }
+  .btn-primary{background:var(--plum);color:#fff}
+  .btn-primary:hover{background:var(--plum-dark);transform:translateY(-1px);box-shadow:0 10px 20px -10px rgba(124,58,45,.7)}
+  .btn-ghost{background:#fff;color:var(--plum);border:1px solid var(--plum)}
+  .btn-ghost:hover{background:var(--paper-2)}
+
+  /* Star component */
+  .star{width:22px;height:22px;cursor:pointer;color:#d8c7a6;transition:color .1s, transform .1s}
+  .star.on{color:var(--gold)}
+  .star:hover{transform:scale(1.12)}
+  .stars.static .star{cursor:default}
+  .stars.static .star:hover{transform:none}
+
+  /* Past books */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:26px}
+  .past-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;text-align:center;
+    transition:transform .15s, box-shadow .15s}
+  .past-card:hover{transform:translateY(-4px);box-shadow:0 16px 28px -16px rgba(0,0,0,.3)}
+  .past-card img{width:120px;aspect-ratio:2/3;margin:0 auto 12px;object-fit:cover;border-radius:4px;
+    box-shadow:0 10px 18px -10px rgba(0,0,0,.5)}
+  .past-card h3{font-family:var(--serif);font-size:17px;margin:6px 0 2px;line-height:1.25}
+  .past-card .author{font-size:12.5px;color:var(--ink-soft);font-style:italic;font-family:var(--serif);margin-bottom:8px}
+  .past-card .grp{display:inline-flex;align-items:center;gap:6px}
+  .past-card .grp .num{font-weight:700;font-size:13px}
+
+  .section-title{font-family:var(--serif);font-size:24px;margin:0 0 18px;display:flex;align-items:center;gap:12px}
+  .section-title::after{content:"";flex:1;height:1px;background:var(--line)}
+  .empty{color:var(--ink-soft);font-style:italic;text-align:center;padding:40px 0;font-family:var(--serif)}
+
+  /* Rate panel */
+  .rate-grid{display:grid;grid-template-columns:1fr;gap:28px}
+  @media(min-width:760px){.rate-grid{grid-template-columns:240px 1fr}}
+  .rate-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:26px}
+  .rate-card h2{font-family:var(--serif);margin:0 0 6px}
+  .rate-card .author{color:var(--ink-soft);font-family:var(--serif);font-style:italic;margin:0 0 22px}
+  .field{margin-bottom:24px}
+  .field label{display:block;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-soft);margin-bottom:10px}
+  .progress-controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  input[type=number]{width:84px;padding:9px 10px;border:1px solid var(--line);border-radius:8px;font-size:15px;font-family:var(--sans);background:#fff}
+  input[type=range]{flex:1;min-width:160px;accent-color:var(--plum)}
+  .pct{font-weight:700;color:var(--plum);min-width:46px;text-align:right}
+  .toggle-fin{display:inline-flex;align-items:center;gap:10px;cursor:pointer;user-select:none}
+  .toggle-fin input{width:18px;height:18px;accent-color:var(--plum)}
+  .saved{color:#2f7d52;font-weight:600;font-size:13px;opacity:0;transition:opacity .2s}
+  .saved.show{opacity:1}
+  .err{color:#b23b2e;font-size:13px;margin-top:8px}
+  .rate-side{text-align:center}
+  .rate-side img{width:200px;max-width:60vw;aspect-ratio:2/3;border-radius:6px;box-shadow:0 18px 30px -16px rgba(0,0,0,.5);object-fit:cover}
+
+  footer{text-align:center;color:var(--ink-soft);font-size:12.5px;padding:30px 20px;border-top:1px solid var(--line);font-family:var(--serif)}
+</style>
+</head>
+<body>
+<header class="site">
+  <div class="crest"><span class="dot"></span> Est. 2026 <span class="dot"></span></div>
+  <h1 class="club" id="club-name">The Reading Circle</h1>
+  <div class="tagline">A shared shelf, read together.</div>
+</header>
+
+<nav class="tabs">
+  <button class="tab active" data-tab="current">📖 Current Book</button>
+  <button class="tab" data-tab="past">📚 Past Books</button>
+  <button class="tab" data-tab="rate">⭐ Rate &amp; Progress</button>
+</nav>
+
+<main>
+  <div class="badge-demo" id="demo-badge">Demo mode — data is stored in your browser only. Add Supabase keys (top of the script) to share ratings with the group.</div>
+
+  <!-- CURRENT BOOK -->
+  <section class="panel active" id="panel-current">
+    <div class="hero">
+      <div class="cover-wrap"><img class="book-cover" id="cur-cover" alt="Current book cover"></div>
+      <h2 id="cur-title"></h2>
+      <div class="author" id="cur-author"></div>
+      <div class="rating-row">
+        <span class="stars static" id="cur-stars"></span>
+        <span class="num" id="cur-num">—</span>
+        <span class="count" id="cur-count"></span>
+      </div>
+      <div class="status-pill" id="cur-status"></div>
+      <div class="cta-rate"><button class="btn btn-primary" data-go="rate">Rate this book &amp; update progress</button></div>
+    </div>
+  </section>
+
+  <!-- PAST BOOKS -->
+  <section class="panel" id="panel-past">
+    <h2 class="section-title">Past reads</h2>
+    <div class="grid" id="past-grid"></div>
+  </section>
+
+  <!-- RATE -->
+  <section class="panel" id="panel-rate">
+    <div class="rate-grid">
+      <div class="rate-side">
+        <img id="rate-cover" alt="Book cover">
+      </div>
+      <div class="rate-card">
+        <h2 id="rate-title"></h2>
+        <div class="author" id="rate-author"></div>
+
+        <div class="field">
+          <label>Your rating</label>
+          <div class="stars" id="rate-stars"></div>
+        </div>
+
+        <div class="field">
+          <label>Reading progress</label>
+          <div class="progress-controls">
+            <input type="number" id="pages" min="0" inputmode="numeric" />
+            <span id="pages-of">/ — pages</span>
+            <input type="range" id="range" min="0" max="100" value="0" />
+            <span class="pct" id="pct">0%</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="toggle-fin"><input type="checkbox" id="finished"> I’ve finished reading</label>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+          <button class="btn btn-primary" id="save">Save</button>
+          <button class="btn btn-ghost" id="finished-btn">Mark as finished</button>
+          <span class="saved" id="saved">Saved ✓</span>
+        </div>
+        <div class="err" id="err"></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer id="foot"></footer>
+
+<script>
+/* ============================================================
+   EDIT THIS CONFIG
+   ============================================================ */
+const CONFIG = {
+  clubName: "The Reading Circle",
+
+  // Shared backend: create a free Supabase project, paste the URL + anon key.
+  // Leave blank to run in local demo mode (data stored per-browser only).
+  supabaseUrl: "",
+  supabaseAnonKey: "",
+
+  // Table name created in Supabase (see README setup).
+  table: "book_club",
+
+  currentBook: {
+    id: "the-midnight-library",
+    title: "The Midnight Library",
+    author: "Matt Haig",
+    totalPages: 304,
+    // Optional: a real cover image URL. Leave "" to auto-generate a cover.
+    coverUrl: ""
+  },
+
+  pastBooks: [
+    { id: "tomorrow-tomorrow-tomorrow", title: "Tomorrow, and Tomorrow, and Tomorrow", author: "Gabrielle Zevin", totalPages: 416, coverUrl: "" },
+    { id: "lessons-in-chemistry",      title: "Lessons in Chemistry",                 author: "Bonnie Garmus",  totalPages: 390, coverUrl: "" },
+    { id: "the-seven-husbands",        title: "The Seven Husbands of Evelyn Hugo",     author: "Taylor Jenkins Reid", totalPages: 400, coverUrl: "" },
+    { id: "project-hail-mary",         title: "Project Hail Mary",                     author: "Andy Weir",      totalPages: 476, coverUrl: "" }
+  ]
+};
+
+/* ============================================================ */
+/* --- Cover generator (works offline / in preview) ---------- */
+const PALETTES = {
+  "the-midnight-library":["#1b2a4a","#3a5a8c"],
+  "tomorrow-tomorrow-tomorrow":["#6b2d5c","#b14e86"],
+  "lessons-in-chemistry":["#1f6f5c","#3aa987"],
+  "the-seven-husbands":["#5a1a1a","#9c3a3a"],
+  "project-hail-mary":["#2a2a2a","#5a8a3a"]
+};
+function wrapText(text, maxChars){
+  const words = text.split(" "); const lines=[]; let line="";
+  for(const w of words){
+    if((line+" "+w).trim().length <= maxChars) line=(line+" "+w).trim();
+    else { if(line) lines.push(line); line=w; }
+  }
+  if(line) lines.push(line);
+  return lines.slice(0,4);
+}
+function coverDataUri(book){
+  if(book.coverUrl) return book.coverUrl;
+  const p = PALETTES[book.id] || ["#4a3526","#7c3a2d"];
+  const titleLines = wrapText(book.title, book.title.length>22?16:20);
+  let ty = 180 - (titleLines.length-1)*22;
+  const tspans = titleLines.map(l=>{
+    const s = '<text x="150" y="'+ty+'" fill="#fff" font-family="Georgia,serif" font-size="26" text-anchor="middle" font-weight="bold">'+esc(l)+'</text>';
+    ty += 38; return s;
+  }).join("");
+  const svg = "<svg xmlns='http://www.w3.org/2000/svg' width='300' height='450' viewBox='0 0 300 450'>"+
+    "<defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'>"+
+    "<stop offset='0' stop-color='"+p[0]+"'/><stop offset='1' stop-color='"+p[1]+"'/></linearGradient></defs>"+
+    "<rect width='300' height='450' fill='url(#g)'/>"+
+    "<rect x='18' y='18' width='264' height='414' fill='none' stroke='rgba(255,255,255,.4)' stroke-width='2'/>"+
+    "<rect x='26' y='26' width='248' height='398' fill='none' stroke='rgba(255,255,255,.18)' stroke-width='1'/>"+
+    tspans+
+    "<line x1='110' y1='405' x2='190' y2='405' stroke='rgba(255,255,255,.6)' stroke-width='1.5'/>"+
+    "<text x='150' y='428' fill='rgba(255,255,255,.85)' font-family='sans-serif' font-size='14' text-anchor='middle'>"+esc(book.author)+"</text>"+
+    "</svg>";
+  return "data:image/svg+xml;utf8,"+encodeURIComponent(svg);
+}
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+
+/* ============================================================ */
+/* --- User identity ----------------------------------------- */
+function getUserId(){
+  let id = localStorage.getItem("bc_user_id");
+  if(!id){ id = "u_"+Math.random().toString(36).slice(2,10); localStorage.setItem("bc_user_id", id); }
+  return id;
+}
+
+/* ============================================================ */
+/* --- Data layer: Supabase (REST) or local fallback --------- */
+const USE_SB = CONFIG.supabaseUrl && CONFIG.supabaseAnonKey;
+const uid = getUserId();
+
+function sbHeaders(extra){
+  return Object.assign({
+    "apikey": CONFIG.supabaseAnonKey,
+    "Authorization": "Bearer " + CONFIG.supabaseAnonKey,
+    "Content-Type": "application/json"
+  }, extra||{});
+}
+
+async function getAllForBook(bookId){
+  if(USE_SB){
+    const url = CONFIG.supabaseUrl+"/rest/v1/"+CONFIG.table+"?book_id=eq."+encodeURIComponent(bookId)+"&select=user_id,rating,progress,finished";
+    const res = await fetch(url, {headers: sbHeaders()});
+    if(!res.ok) throw new Error("fetch failed");
+    return await res.json();
+  }
+  return localStore().allForBook(bookId);
+}
+async function getMyRecord(bookId){
+  if(USE_SB){
+    const url = CONFIG.supabaseUrl+"/rest/v1/"+CONFIG.table+"?user_id=eq."+uid+"&book_id=eq."+encodeURIComponent(bookId)+"&select=rating,progress,finished";
+    const res = await fetch(url, {headers: sbHeaders()});
+    if(!res.ok) throw new Error("fetch failed");
+    const arr = await res.json();
+    return arr[0] || null;
+  }
+  return localStore().myRecord(bookId);
+}
+async function saveRecord(bookId, fields){
+  if(USE_SB){
+    const body = Object.assign({user_id:uid, book_id:bookId, updated_at:new Date().toISOString()},
+      fields, {rating: fields.rating===undefined?null:fields.rating,
+               progress: fields.progress===undefined?null:fields.progress,
+               finished: fields.finished===undefined?false:fields.finished});
+    const url = CONFIG.supabaseUrl+"/rest/v1/"+CONFIG.table+"?on_conflict=user_id,book_id";
+    const res = await fetch(url, {
+      method:"POST",
+      headers: sbHeaders({"Prefer":"resolution=merge-duplicates"}),
+      body: JSON.stringify(body)
+    });
+    if(!res.ok) throw new Error("save failed");
+    return;
+  }
+  localStore().save(bookId, fields);
+}
+
+/* --- Local store (demo mode) with seeded group data -------- */
+function localStore(){
+  const KEY = "bc_local_data";
+  function load(){
+    try { return JSON.parse(localStorage.getItem(KEY)) || {}; }
+    catch(e){ return {}; }
+  }
+  function saveAll(d){ localStorage.setItem(KEY, JSON.stringify(d)); }
+  function ensureSeed(d){
+    if(d._seeded) return d;
+    const seedMembers = ["Ava","Marco","Priya","Theo","Lena"];
+    const ratings = {
+      "the-midnight-library":[5,4,5,3,null],
+      "tomorrow-tomorrow-tomorrow":[5,5,4,5,4],
+      "lessons-in-chemistry":[4,5,4,null,5],
+      "the-seven-husbands":[5,4,5,5,4],
+      "project-hail-mary":[4,5,5,4,5]
+    };
+    Object.keys(ratings).forEach(bookId=>{
+      ratings[bookId].forEach((r,i)=>{
+        const m = "demo_"+seedMembers[i];
+        if(!d[bookId]) d[bookId]={};
+        d[bookId][m]={rating:r, progress: r?100:30, finished: !!r};
+      });
+    });
+    d._seeded = true;
+    return d;
+  }
+  return {
+    allForBook(bookId){
+      const d = ensureSeed(load()); saveAll(d);
+      const recs = d[bookId] || {};
+      return Object.entries(recs).map(([user_id,v])=>Object.assign({user_id}, v));
+    },
+    myRecord(bookId){
+      const d = ensureSeed(load()); saveAll(d);
+      return (d[bookId] && d[bookId][uid]) || null;
+    },
+    save(bookId, fields){
+      const d = ensureSeed(load());
+      if(!d[bookId]) d[bookId]={};
+      const cur = d[bookId][uid] || {rating:null, progress:0, finished:false};
+      d[bookId][uid] = Object.assign({}, cur, fields);
+      saveAll(d);
+    }
+  };
+}
+
+/* ============================================================ */
+/* --- Aggregation ------------------------------------------- */
+function aggregate(records){
+  const rated = records.filter(r=>r.rating!=null && r.rating>0);
+  const avg = rated.length ? rated.reduce((s,r)=>s+r.rating,0)/rated.length : 0;
+  const finished = records.filter(r=>r.finished).length;
+  return { avg: avg, ratedCount: rated.length, total: records.length, finished: finished };
+}
+
+/* ============================================================ */
+/* --- Stars rendering --------------------------------------- */
+const STAR = '<svg class="star" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.9L22 10l-5.5 4.8L18.2 22 12 18.3 5.8 22l1.7-7.2L2 10l7.1-1.1z"/></svg>';
+function renderStarsStatic(el, value){
+  const v = Math.round(value*2)/2;
+  el.innerHTML = Array.from({length:5},function(_,i){
+    const fill = (i+1) <= Math.floor(v);
+    const star = STAR.replace('class="star"', 'class="star'+(fill?' on':'')+'"');
+    return star;
+  }).join("");
+}
+function renderStarsInput(el, value){
+  el.innerHTML="";
+  for(let i=1;i<=5;i++){
+    const wrap = document.createElement("span");
+    wrap.innerHTML = STAR.replace('class="star"', 'class="star'+(i<=value?' on':'')+'"');
+    const star = wrap.firstChild;
+    star.addEventListener("click", function(){ state.myRating = i; paintInput(); });
+    star.addEventListener("mouseenter", function(){ paintInput(i); });
+    el.appendChild(star);
+  }
+  el.addEventListener("mouseleave", function(){ paintInput(); });
+  function paintInput(hover){ el.querySelectorAll(".star").forEach(function(s,idx){ s.classList.toggle("on", (idx+1)<=(hover||state.myRating)); }); }
+}
+
+/* ============================================================ */
+/* --- State + wiring ---------------------------------------- */
+const state = { myRating:0, myProgress:0, myFinished:false };
+
+document.getElementById("club-name").textContent = CONFIG.clubName;
+document.title = CONFIG.clubName + " — Book Club";
+
+if(!USE_SB) document.getElementById("demo-badge").classList.add("show");
+
+// tab switching
+document.querySelectorAll(".tab").forEach(function(b){b.addEventListener("click", function(){activate(b.dataset.tab);});});
+document.querySelectorAll("[data-go]").forEach(function(b){b.addEventListener("click", function(){activate(b.dataset.go);});});
+function activate(name){
+  document.querySelectorAll(".tab").forEach(function(b){b.classList.toggle("active", b.dataset.tab===name);});
+  document.querySelectorAll(".panel").forEach(function(p){p.classList.toggle("active", p.id==="panel-"+name);});
+  if(name==="rate") loadRatePanel();
+}
+
+// current book hero
+const cb = CONFIG.currentBook;
+document.getElementById("cur-cover").src = coverDataUri(cb);
+document.getElementById("cur-title").textContent = cb.title;
+document.getElementById("cur-author").textContent = "by " + cb.author;
+
+async function refreshCurrent(){
+  try{
+    const recs = await getAllForBook(cb.id);
+    const a = aggregate(recs);
+    renderStarsStatic(document.getElementById("cur-stars"), a.avg);
+    document.getElementById("cur-num").textContent = a.avg ? a.avg.toFixed(1) : "—";
+    document.getElementById("cur-count").textContent = a.ratedCount ? "· "+a.ratedCount+" rating"+(a.ratedCount>1?"s":"") : "· not rated yet";
+    const my = recs.find(function(r){return r.user_id===uid;});
+    let pill = "Not started yet";
+    if(my){
+      if(my.finished) pill = "✓ You’ve finished";
+      else if(my.progress) pill = "You’re on page "+my.progress+" of "+cb.totalPages+" ("+Math.round(my.progress/cb.totalPages*100)+"%)";
+      else if(my.rating) pill = "You rated this book";
+    }
+    document.getElementById("cur-status").textContent = pill;
+  }catch(e){
+    document.getElementById("cur-count").textContent = "· unavailable";
+  }
+}
+
+// past books
+function renderPast(){
+  const grid = document.getElementById("past-grid");
+  grid.innerHTML="";
+  CONFIG.pastBooks.forEach(async function(b){
+    const card = document.createElement("div");
+    card.className="past-card";
+    card.innerHTML = '<img src="'+coverDataUri(b)+'" alt="'+esc(b.title)+' cover">'+
+      '<h3>'+esc(b.title)+'</h3>'+
+      '<div class="author">'+esc(b.author)+'</div>'+
+      '<div class="grp"><span class="stars static" data-stars></span><span class="num"></span> <span class="count"></span></div>';
+    grid.appendChild(card);
+    try{
+      const recs = await getAllForBook(b.id);
+      const a = aggregate(recs);
+      renderStarsStatic(card.querySelector("[data-stars]"), a.avg);
+      card.querySelector(".num").textContent = a.avg? a.avg.toFixed(1):"—";
+      card.querySelector(".count").textContent = a.ratedCount? "("+a.ratedCount+")":"";
+    }catch(e){}
+  });
+}
+
+// rate panel
+function loadRatePanel(){
+  document.getElementById("rate-cover").src = coverDataUri(cb);
+  document.getElementById("rate-title").textContent = cb.title;
+  document.getElementById("rate-author").textContent = "by " + cb.author;
+  document.getElementById("pages-of").textContent = "/ "+cb.totalPages+" pages";
+  getMyRecord(cb.id).then(function(my){
+    state.myRating = (my && my.rating) || 0;
+    state.myProgress = (my && my.progress) || 0;
+    state.myFinished = !!(my && my.finished);
+    document.getElementById("pages").value = state.myProgress || "";
+    document.getElementById("range").value = Math.min(100, Math.round(state.myProgress/cb.totalPages*100));
+    document.getElementById("finished").checked = state.myFinished;
+    renderStarsInput(document.getElementById("rate-stars"), state.myRating);
+    updatePct();
+  }).catch(function(){ renderStarsInput(document.getElementById("rate-stars"), 0); });
+}
+function updatePct(){
+  const p = parseInt(document.getElementById("pages").value)||0;
+  const pct = Math.min(100, Math.round(p/cb.totalPages*100));
+  document.getElementById("pct").textContent = pct+"%";
+  document.getElementById("range").value = pct;
+  if(p>=cb.totalPages){ document.getElementById("finished").checked = true; state.myFinished = true; }
+}
+document.getElementById("pages").addEventListener("input", updatePct);
+document.getElementById("range").addEventListener("input", function(){
+  const pct = parseInt(document.getElementById("range").value);
+  const p = Math.round(pct/100*cb.totalPages);
+  document.getElementById("pages").value = p;
+  document.getElementById("pct").textContent = pct+"%";
+});
+document.getElementById("finished").addEventListener("change", function(e){ state.myFinished = e.target.checked; });
+
+async function doSave(forceFinished){
+  const errEl = document.getElementById("err"); errEl.textContent="";
+  const p = parseInt(document.getElementById("pages").value)||0;
+  if(p<0||p>cb.totalPages){ errEl.textContent = "Pages must be between 0 and "+cb.totalPages+"."; return; }
+  const finished = forceFinished!==undefined ? forceFinished : document.getElementById("finished").checked;
+  state.myFinished = finished;
+  document.getElementById("finished").checked = finished;
+  const fields = {
+    rating: state.myRating || null,
+    progress: finished ? cb.totalPages : p,
+    finished: finished
+  };
+  if(finished){ document.getElementById("pages").value = cb.totalPages; updatePct(); }
+  try{
+    await saveRecord(cb.id, fields);
+    document.getElementById("saved").classList.add("show");
+    setTimeout(function(){document.getElementById("saved").classList.remove("show");}, 2000);
+    refreshCurrent();
+  }catch(e){
+    errEl.textContent = "Could not save. Check your Supabase setup and connection.";
+  }
+}
+document.getElementById("save").addEventListener("click", function(){doSave();});
+document.getElementById("finished-btn").addEventListener("click", function(){doSave(true);});
+
+// init
+refreshCurrent();
+renderPast();
+document.getElementById("foot").textContent = CONFIG.clubName+" · hosted on GitHub Pages";
+</script>
+</body>
+</html>

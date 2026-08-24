@@ -174,6 +174,27 @@
   .review-item .who{font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);margin-bottom:6px}
   .review-item .what{font-family:var(--serif);font-size:15px;line-height:1.55;white-space:pre-wrap}
 
+  /* Suggestions */
+  .rec-card{background:var(--paper-2);border:1px solid var(--line);border-radius:14px;padding:16px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px;transition:transform .15s, box-shadow .15s}
+  .rec-card:hover{transform:translateY(-4px);box-shadow:0 16px 28px -16px rgba(63,89,66,.28);border-color:var(--moss)}
+  .rec-card img{width:120px;aspect-ratio:2/3;object-fit:cover;border-radius:6px;background:var(--paper);box-shadow:0 10px 18px -10px rgba(0,0,0,.45)}
+  .rec-card .rec-cover-fallback{width:120px;aspect-ratio:2/3;border-radius:6px;background:var(--paper);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;padding:10px;text-align:center;font-family:var(--serif);font-size:12px;color:var(--ink-soft)}
+  .rec-card h3{font-family:var(--serif);font-size:15px;margin:2px 0 0;line-height:1.25}
+  .rec-card .author{font-size:12px;color:var(--ink-soft);font-style:italic;font-family:var(--serif)}
+  .rec-card .why{font-size:11.5px;color:var(--moss-dark);background:rgba(93,122,93,.10);border:1px solid rgba(93,122,93,.18);border-radius:999px;padding:3px 10px;font-style:italic;font-family:var(--serif)}
+  .rec-card .rec-add{margin-top:4px}
+  .rec-card .rec-add.done{pointer-events:none;opacity:.6}
+  .rec-card .rec-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+
+  /* Wishlist */
+  .wl-card{background:var(--paper-2);border:1px solid var(--line);border-radius:14px;padding:16px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px}
+  .wl-card img{width:120px;aspect-ratio:2/3;object-fit:cover;border-radius:6px;background:var(--paper);box-shadow:0 10px 18px -10px rgba(0,0,0,.45)}
+  .wl-card .wl-cover-fallback{width:120px;aspect-ratio:2/3;border-radius:6px;background:var(--paper);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;padding:10px;text-align:center;font-family:var(--serif);font-size:12px;color:var(--ink-soft)}
+  .wl-card h3{font-family:var(--serif);font-size:15px;margin:2px 0 0;line-height:1.25}
+  .wl-card .author{font-size:12px;color:var(--ink-soft);font-style:italic;font-family:var(--serif)}
+  .wl-card .nominated{font-size:11px;color:var(--ink-soft);font-family:var(--serif)}
+  .wl-card .wl-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:4px}
+
   /* Stats */
   .stats-note{color:var(--ink-soft);font-size:13px;font-family:var(--serif);font-style:italic;margin:-8px 0 18px}
   .stats-wrap{overflow-x:auto}
@@ -226,7 +247,7 @@
 <header class="site">
   <div class="crest"><span class="dot"></span> Est. 2026 <span class="dot"></span></div>
   <h1 class="club" id="club-name">Booked and Busy</h1>
-  <div class="tagline">Book Clerb.</div>
+  <div class="tagline">It's a book clerb.</div>
 </header>
 
 <nav class="tabs">
@@ -234,6 +255,7 @@
   <button class="tab" data-tab="past">📚 Past Books</button>
   <button class="tab" data-tab="rate">⭐ Rate &amp; Progress</button>
   <button class="tab" data-tab="stats">📊 Reader Stats</button>
+  <button class="tab" data-tab="recommend">💡 Suggestions</button>
   <button class="tab admin-tab" data-tab="admin">⚙️ Admin</button>
 </nav>
 
@@ -304,6 +326,27 @@
         <div class="err" id="err"></div>
       </div>
     </div>
+  </section>
+
+  <section class="panel" id="panel-recommend">
+    <h2 class="section-title">Suggestions</h2>
+    <p class="stats-note">Based on what your club (or a single member) rated highly — pulls similar titles from Open Library.</p>
+    <div id="rec-controls" style="margin-bottom:18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <label style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-soft)">Taste from</label>
+      <select id="rec-source" style="padding:9px 12px;border:1px solid var(--line);border-radius:9px;font-size:15px;font-family:var(--sans);background:#fbfaf3">
+        <option value="club">The whole club</option>
+      </select>
+      <button class="btn btn-primary" id="rec-go">✨ Find recommendations</button>
+      <span class="lookup-status" id="rec-status"></span>
+    </div>
+    <div class="grid" id="rec-grid"></div>
+
+    <h3 class="section-title" style="margin-top:38px" id="wl-heading">🔖 Reading wishlist</h3>
+    <p class="stats-note">Books your club wants to read next. Save suggestions here, or promote one to the book list.</p>
+    <div id="wl-controls" style="margin-bottom:14px">
+      <button class="btn btn-ghost btn-sm" id="wl-refresh">↻ Refresh</button>
+    </div>
+    <div class="grid" id="wl-grid"></div>
   </section>
 
   <section class="panel" id="panel-stats">
@@ -397,6 +440,7 @@ const CONFIG = {
   booksTable: "books",
   membersTable: "members",
   ratingsTable: "book_club",
+  wishlistTable: "wishlist",
 
   // Passcode to unlock the Admin tab. CHANGE THIS to something only you know.
   adminPasscode: "Jakerules123"
@@ -597,6 +641,37 @@ async function getMembersMap(){
   return m;
 }
 
+// --- Wishlist (shared reading list) ------------------------
+async function getWishlist(){
+  const url = CONFIG.supabaseUrl+"/rest/v1/"+CONFIG.wishlistTable+
+    "?select=id,user_id,work_id,title,author,cover_url,added_at&order=added_at.desc";
+  const res = await fetch(url, {headers: sbHeaders()});
+  if(!res.ok) throw new Error("wishlist fetch failed");
+  return await res.json();
+}
+async function addToWishlist(item){
+  const body = {
+    user_id: uid,
+    work_id: item.work_id || null,
+    title: item.title,
+    author: item.author || null,
+    cover_url: item.cover_url || null
+  };
+  const url = CONFIG.supabaseUrl+"/rest/v1/"+CONFIG.wishlistTable;
+  const res = await fetch(url, {
+    method:"POST",
+    headers: sbHeaders({"Prefer":"return=representation"}),
+    body: JSON.stringify(body)
+  });
+  if(!res.ok) throw new Error("wishlist add failed");
+  return await res.json();
+}
+async function deleteWishlistItem(id){
+  const url = CONFIG.supabaseUrl+"/rest/v1/"+CONFIG.wishlistTable+"?id=eq."+encodeURIComponent(id);
+  const res = await fetch(url, {method:"DELETE", headers: sbHeaders()});
+  if(!res.ok) throw new Error("wishlist delete failed");
+}
+
 // --- Ratings -----------------------------------------------
 async function getAllForBook(bookId){
   const url = CONFIG.supabaseUrl+"/rest/v1/"+CONFIG.ratingsTable+
@@ -695,6 +770,7 @@ function activate(name){
   document.querySelectorAll(".panel").forEach(function(p){p.classList.toggle("active", p.id==="panel-"+name);});
   if(name==="rate") loadRatePanel();
   if(name==="stats") renderStats();
+  if(name==="recommend") maybeLoadRecs();
   if(name==="admin") maybeLoadAdmin();
 }
 
@@ -877,6 +953,312 @@ async function renderStats(){
     }).join("");
   }catch(e){ el.innerHTML='<tr><td colspan="5" class="empty">Could not load stats.</td></tr>'; }
 }
+
+/* ============================================================ */
+/* --- Suggestions (Open Library, taste-based) --------------- */
+async function maybeLoadRecs(){
+  // Populate the taste-source selector with known members.
+  try{
+    const members = await getMembersMap();
+    const sel = document.getElementById("rec-source");
+    const curVal = sel.value || "club";
+    const opts = '<option value="club">The whole club</option>' +
+      Object.keys(members).map(function(u){
+        const label = (members[u] || "A member") + (u===uid ? " (you)" : "");
+        return '<option value="'+esc(u)+'">'+esc(label)+'</option>';
+      }).join("");
+    sel.innerHTML = opts;
+    sel.value = curVal;
+  }catch(e){ /* leave default club option */ }
+  loadWishlist();
+}
+function setRecStatus(cls, msg){
+=======
+function maybeLoadRecs(){
+  // lazy: only fire network calls on explicit button click
+}
+function setRecStatus(cls, msg){
+function setRecStatus(cls, msg){
+  const s = document.getElementById("rec-status");
+  if(!s) return;
+  s.className = "lookup-status"+(cls?" "+cls:"");
+  s.textContent = msg || "";
+}
+function normTitle(t){ return String(t||"").toLowerCase().replace(/[^a-z0-9]+/g,""); }
+
+// Fetch an Open Library book's metadata (author OLIDs + subjects) from its ISBN/OLID.
+async function fetchBookMeta(isbn){
+  const kind = idKind(isbn);
+  const bibkey = kind+":"+encodeURIComponent(isbn);
+  const url = "https://openlibrary.org/api/books?bibkeys="+bibkey+"&format=json&jscmd=data";
+  const res = await fetch(url);
+  if(!res.ok) throw new Error("meta fetch failed");
+  const data = await res.json();
+  const book = data[bibkey] || Object.values(data)[0];
+  if(!book) return null;
+  const authors = (book.authors||[]).map(function(a){
+    const m = (a.key||a.url||"").match(/OL\d+[A-Z]{1,3}/i);
+    return { name:a.name||"", olid: m?m[0]:null };
+  }).filter(function(a){return a.olid;});
+  const subjects = (book.subjects||[]).map(function(s){return s.name||"";}).filter(Boolean);
+  return { authors:authors, subjects:subjects.slice(0,8) };
+}
+
+// Fetch other works by an author OLID.
+async function fetchAuthorWorks(authorOlid, limit){
+  const url = "https://openlibrary.org/authors/"+authorOlid+"/works.json?limit="+limit;
+  const res = await fetch(url);
+  if(!res.ok) return [];
+  const data = await res.json();
+  return (data.entries||[]).map(function(w){
+    const m = (w.key||"").match(/OL\d+[A-Z]{1,3}/i);
+    return { workId: m?m[0]:null, title:w.title||"", coverId:w.covers&&w.covers[0]||w.cover_id||null, year:w.first_publish_year||null };
+  }).filter(function(w){return w.workId;});
+}
+
+// Fetch books in a subject.
+async function fetchSubjectWorks(subject, limit){
+  const url = "https://openlibrary.org/subjects/"+encodeURIComponent(subject.toLowerCase().replace(/\s+/g,"_"))+".json?limit="+limit;
+  const res = await fetch(url);
+  if(!res.ok) return [];
+  const data = await res.json();
+  return (data.works||[]).map(function(w){
+    const m = (w.key||"").match(/OL\d+[A-Z]{1,3}/i);
+    const author = (w.authors&&w.authors[0]&&w.authors[0].name)||"";
+    return { workId: m?m[0]:null, title:w.title||"", author:author, coverId:w.cover_id||null, year:w.first_publish_year||null };
+  }).filter(function(w){return w.workId;});
+}
+
+function coverById(coverId){
+  return "https://covers.openlibrary.org/b/id/"+coverId+"-M.jpg?default=false";
+}
+
+async function buildRecommendations(){
+  const grid = document.getElementById("rec-grid");
+  const status = document.getElementById("rec-status");
+  grid.innerHTML = "";
+  setRecStatus("", "Reading "+whose+"'s ratings…");
+  try{
+    if(!BOOKS){ BOOKS = await loadBookList(); }
+    const all = (BOOKS.currentBook?[BOOKS.currentBook]:[]).concat(BOOKS.pastBooks||[]);
+    const have = {};
+    all.forEach(function(b){ if(b.title) have[normTitle(b.title)] = true; });
+
+    const recs = await getAllRecords();
+    const sourceSel = document.getElementById("rec-source");
+    const sourceUid = sourceSel && sourceSel.value && sourceSel.value!=="club" ? sourceSel.value : null;
+    const filtered = sourceUid ? recs.filter(function(r){return r.user_id===sourceUid;}) : recs;
+    // Average rating per book (group) or that member's own rating.
+    const byBook = {};
+    filtered.forEach(function(r){
+      if(r.rating!=null && r.rating>0){
+        if(!byBook[r.book_id]) byBook[r.book_id]={sum:0,n:0};
+        byBook[r.book_id].sum += r.rating; byBook[r.book_id].n += 1;
+      }
+    });
+    const ranked = Object.keys(byBook).map(function(id){
+      return { id:id, avg: byBook[id].sum/byBook[id].n, n: byBook[id].n };
+    }).filter(function(x){return x.n>=1;}).sort(function(a,b){return b.avg-a.avg;}).slice(0,4);
+    const whose = sourceUid ? "this member" : "your club";
+
+    if(!ranked.length){
+      grid.innerHTML = '<div class="empty">No ratings yet for '+whose+'. Rate a few books first — suggestions are based on what was loved.</div>';
+      setRecStatus("ok", "");
+      return;
+    }
+
+    // Enrich top books with author OLIDs + subjects.
+    setRecStatus("", "Finding "+whose+"'s favourite authors & subjects…");
+    const authorSrc = {};   // olid -> { name, fromTitle }
+    const subjectCount = {}; // subject -> count
+    const topBookById = {};
+    all.forEach(function(b){ topBookById[b.id]=b; });
+    const enriched = await Promise.all(ranked.map(function(x){
+      const b = topBookById[x.id];
+      if(!b || !b.isbn) return null;
+      return fetchBookMeta(b.isbn).then(function(m){ return m?{book:b, meta:m}:null; }).catch(function(){return null;});
+    }));
+    enriched.forEach(function(e){
+      if(!e) return;
+      (e.meta.authors||[]).forEach(function(a){ authorSrc[a.olid] = { name:a.name, fromTitle:e.book.title }; });
+      (e.meta.subjects||[]).forEach(function(s){ subjectCount[s] = (subjectCount[s]||0)+1; });
+    });
+    const topSubjects = Object.keys(subjectCount).sort(function(a,b){return subjectCount[b]-subjectCount[a];}).slice(0,3);
+
+    if(!Object.keys(authorSrc).length && !topSubjects.length){
+      grid.innerHTML = '<div class="empty">'+(sourceUid?'This member\'s':'Your club\'s')+' top-rated books have no ISBN/OLID on file, so we can\'t trace their authors. Add ISBNs in Admin, then try again.</div>';
+      setRecStatus("ok", "");
+      return;
+    }
+
+    // Pull candidates: other works by those authors + books in those subjects.
+    setRecStatus("", "Gathering titles from Open Library…");
+    const cand = {}; // workId -> {title, author, coverId, year, reasons:Set, authorHits, subjectHits}
+    function addCand(w, reason, isAuthor){
+      if(have[normTitle(w.title)]) return;       // already read
+      if(!cand[w.workId]) cand[w.workId] = { title:w.title, author:w.author||"", workId:w.workId, coverId:w.coverId, year:w.year||null, reasons:{}, authorHits:0, subjectHits:0 };
+      const c = cand[w.workId];
+      c.reasons[reason] = true;
+      if(isAuthor) c.authorHits++; else c.subjectHits++;
+      if(!c.coverId && w.coverId) c.coverId = w.coverId;
+      if(!c.author && w.author) c.author = w.author;
+    }
+    const aKeys = Object.keys(authorSrc);
+    const aFetches = aKeys.map(function(k){ return fetchAuthorWorks(k, 8).then(function(ws){
+      const src = authorSrc[k];
+      ws.forEach(function(w){
+        if(w.title && src.fromTitle && normTitle(w.title)===normTitle(src.fromTitle)) return;
+        addCand(Object.assign({}, w, {author: src.name}), "By the author of “"+src.fromTitle+"”", true);
+      });
+    }).catch(function(){return [];}); });
+    const sFetches = topSubjects.map(function(s){ return fetchSubjectWorks(s, 8).then(function(ws){
+      ws.forEach(function(w){ addCand(w, "Popular in “"+s+"”", false); });
+    }).catch(function(){return [];}); });
+    await Promise.all(aFetches.concat(sFetches));
+
+    let list = Object.values(cand).filter(function(c){return c.authorHits>0 || c.coverId;});
+    list.forEach(function(c){ c.score = c.authorHits*3 + c.subjectHits*2 + (c.coverId?1:0) + (c.year? (Math.min(c.year,2025)-1900)/125 : 0); });
+    list.sort(function(a,b){return b.score-a.score;});
+    list = list.slice(0,9);
+
+    if(!list.length){
+      grid.innerHTML = '<div class="empty">No fresh suggestions found right now. Try again later or add more ISBNs to your top books.</div>';
+      setRecStatus("ok", "");
+      return;
+    }
+
+    grid.innerHTML = list.map(function(c, i){
+      const cover = c.coverId
+        ? '<img alt="'+esc(c.title)+' cover" src="'+coverById(c.coverId)+'" data-fallback="'+esc(c.title)+'">'
+        : '<div class="rec-cover-fallback">'+esc(c.title)+'</div>';
+      const reasons = Object.keys(c.reasons).slice(0,2).map(function(r){return '<span class="why">'+esc(r)+'</span>';}).join(" ");
+      return '<div class="rec-card" data-work="'+esc(c.workId)+'">'+
+        cover +
+        '<h3>'+esc(c.title)+'</h3>'+
+        '<div class="author">'+(c.author?('by '+esc(c.author)):'')+'</div>'+
+        (reasons?'<div style="display:flex;flex-wrap:wrap;gap:4px;justify-content:center">'+reasons+'</div>':'')+
+        '<div class="rec-actions">'+
+        '<button class="btn btn-ghost btn-sm rec-add" data-title="'+esc(c.title)+'" data-author="'+esc(c.author)+'" data-olid="'+esc(c.workId)+'" data-cover="'+(c.coverId?coverById(c.coverId):'')+'">＋ Add to club</button>'+
+        '<button class="btn btn-ghost btn-sm rec-save" data-title="'+esc(c.title)+'" data-author="'+esc(c.author)+'" data-olid="'+esc(c.workId)+'" data-cover="'+(c.coverId?coverById(c.coverId):'')+'">🔖 Save</button>'+
+        '</div>'+
+      '</div>';
+    }).join("");
+    setRecStatus("ok", "Showing "+list.length+" suggestion"+(list.length>1?"s":"")+" for "+whose+" — covers load on the live site.");
+    wireRecButtons();
+  }catch(e){
+    grid.innerHTML = '<div class="empty">Could not load suggestions. This works on the deployed site (Open Library is blocked in some previews).</div>';
+    setRecStatus("err", "Failed — try again.");
+  }
+}
+
+function attachCoverFallback(scope, fallbackClass){
+  scope.querySelectorAll("img[data-fallback]").forEach(function(img){
+    img.addEventListener("error", function(){
+      const d = document.createElement("div");
+      d.className = fallbackClass || "rec-cover-fallback";
+      d.textContent = img.getAttribute("data-fallback") || "";
+      img.replaceWith(d);
+    });
+  });
+}
+
+// Shared: pre-fill the Admin add-book form from a title/author/olid/cover.
+function sendToAdmin(t, a, ol, cv){
+  document.getElementById("f-isbn").value = ol;
+  document.getElementById("f-title").value = t;
+  document.getElementById("f-author").value = a;
+  document.getElementById("f-cover").value = cv;
+  document.getElementById("f-pages").value = "";
+  document.getElementById("f-section").value = "past";
+  document.getElementById("add-btn").textContent = "Add book";
+  editingKey = null;
+  const s = document.getElementById("lookup-status");
+  s.className = "lookup-status ok"; s.textContent = "Filled from a suggestion — enter the page count, then Add book.";
+  activate("admin");
+  if(!adminUnlocked){
+    const gate = document.getElementById("gate-err");
+    if(gate){ gate.textContent = "Unlock to finish adding “"+t+"”."; }
+  }
+}
+
+function wireRecButtons(){
+  attachCoverFallback(document.getElementById("rec-grid"));
+  document.querySelectorAll(".rec-add").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      sendToAdmin(btn.getAttribute("data-title")||"", btn.getAttribute("data-author")||"", btn.getAttribute("data-olid")||"", btn.getAttribute("data-cover")||"");
+      btn.textContent = "✓ Sent to Admin";
+      btn.classList.add("done");
+    });
+  });
+  document.querySelectorAll(".rec-save").forEach(function(btn){
+    btn.addEventListener("click", async function(){
+      const t = btn.getAttribute("data-title") || "";
+      const a = btn.getAttribute("data-author") || "";
+      const ol = btn.getAttribute("data-olid") || "";
+      const cv = btn.getAttribute("data-cover") || "";
+      btn.disabled = true; btn.textContent = "Saving…";
+      try{
+        await addToWishlist({ work_id:ol, title:t, author:a, cover_url:cv });
+        btn.textContent = "✓ Saved";
+        btn.classList.add("done");
+        loadWishlist();
+      }catch(e){
+        btn.disabled = false; btn.textContent = "🔖 Save";
+        btn.textContent = "✗ Failed (run wishlist SQL)";
+      }
+    });
+  });
+}
+
+/* --- Wishlist render --------------------------------------- */
+async function loadWishlist(){
+  const grid = document.getElementById("wl-grid");
+  if(!grid) return;
+  let members = {};
+  try{ members = await getMembersMap(); }catch(e){}
+  try{
+    const items = await getWishlist();
+    if(!items.length){
+      grid.innerHTML = '<div class="empty">No saved books yet. Find suggestions above and tap 🔖 Save.</div>';
+      return;
+    }
+    grid.innerHTML = items.map(function(it){
+      const cover = it.cover_url
+        ? '<img alt="'+esc(it.title)+' cover" src="'+esc(it.cover_url)+'" data-fallback="'+esc(it.title)+'">'
+        : '<div class="wl-cover-fallback">'+esc(it.title)+'</div>';
+      const who = members[it.user_id] || "A member";
+      const mine = it.user_id===uid;
+      return '<div class="wl-card" data-id="'+it.id+'">'+
+        cover +
+        '<h3>'+esc(it.title)+'</h3>'+
+        '<div class="author">'+(it.author?('by '+esc(it.author)):'')+'</div>'+
+        '<div class="nominated">nominated by '+esc(who)+(mine?' (you)':'')+'</div>'+
+        '<div class="wl-actions">'+
+          '<button class="btn btn-ghost btn-sm wl-promote" data-title="'+esc(it.title)+'" data-author="'+esc(it.author||'')+'" data-olid="'+esc(it.work_id||'')+'" data-cover="'+esc(it.cover_url||'')+'">＋ Add to club</button>'+
+          (mine?'<button class="btn btn-ghost btn-sm wl-del" data-id="'+it.id+'">✕ Remove</button>':'')+
+        '</div>'+
+      '</div>';
+    }).join("");
+    attachCoverFallback(grid, "wl-cover-fallback");
+    grid.querySelectorAll(".wl-promote").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        sendToAdmin(btn.getAttribute("data-title")||"", btn.getAttribute("data-author")||"", btn.getAttribute("data-olid")||"", btn.getAttribute("data-cover")||"");
+      });
+    });
+    grid.querySelectorAll(".wl-del").forEach(function(btn){
+      btn.addEventListener("click", async function(){
+        const id = btn.getAttribute("data-id");
+        btn.disabled = true;
+        try{ await deleteWishlistItem(id); loadWishlist(); }
+        catch(e){ btn.disabled = false; btn.textContent = "✗"; }
+      });
+    });
+  }catch(e){
+    grid.innerHTML = '<div class="empty">Could not load the wishlist. Run the wishlist SQL from the README.</div>';
+  }
+}
+document.getElementById("rec-go").addEventListener("click", buildRecommendations);
+document.getElementById("wl-refresh").addEventListener("click", loadWishlist);
 
 /* ============================================================ */
 /* --- Admin panel ------------------------------------------- */

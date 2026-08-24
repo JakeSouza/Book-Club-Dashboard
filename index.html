@@ -295,7 +295,7 @@
         <h2 class="section-title" style="margin:0">Manage books</h2>
         <button class="btn btn-ghost btn-sm" id="lock-btn">Lock</button>
       </div>
-      <p class="hint" style="margin:0 0 18px;color:var(--ink-soft);font-size:12.5px;font-style:italic;font-family:var(--serif)">Edits are saved to Supabase and shared with the whole club.</p>
+      <p class="hint" style="margin:0 0 18px;color:var(--ink-soft);font-size:12.5px;font-style:italic;font-family:var(--serif)">Edits are saved to Supabase (one row per book) and shared with the whole club.</p>
 
       <div class="admin-card">
         <h3>➕ Add a book</h3>
@@ -359,11 +359,12 @@ const CONFIG = {
   supabaseAnonKey: "sb_publishable_cDLaMo8FhP84J5FtyJ0_Gw_Xl24N2ra",
 
   // Table names created in Supabase (see README setup).
-  ratingsTable: "book_club",
   booksTable: "books",
+  membersTable: "members",
+  ratingsTable: "book_club",
 
   // Passcode to unlock the Admin tab. CHANGE THIS to something only you know.
-  adminPasscode: "JakeRules123"
+  adminPasscode: "Jakerules123"
 };
 
 /* ============================================================ */
@@ -405,13 +406,11 @@ function coverDataUri(book){
   return "data:image/svg+xml;utf8,"+encodeURIComponent(svg);
 }
 // Detect whether an identifier is an Open Library ID (OLID, e.g. OL28401522M)
-// or an ISBN (10/13 digits, optional trailing X). The /books/ pages on
-// openlibrary.org are indexed by OLID, so users often paste an OLID, not an
-// ISBN — both work, but the cover URL key must match.
+// or an ISBN. The /books/ pages on openlibrary.org are indexed by OLID.
 function idKind(v){
   const s = String(v||"").trim();
   if(/^OL\d+[A-Z]{1,3}$/i.test(s)) return "olid";
-  return "isbn"; // treat anything else as ISBN
+  return "isbn";
 }
 function coverSrc(book){
   if(!book) return coverDataUri({title:"?",author:""});
@@ -469,7 +468,7 @@ function getUserId(){
 }
 
 /* ============================================================ */
-/* --- Data layer (Supabase REST) ---------------------------- */
+/* --- Data layer (Supabase REST, normalized schema) --------- */
 const uid = getUserId();
 
 function sbHeaders(extra){
@@ -480,42 +479,108 @@ function sbHeaders(extra){
   }, extra||{});
 }
 
-// Books are stored as a single JSON blob (key="primary") in the books table.
-async function loadBooks(){
-  const url = CONFIG.supabaseUrl+"/rest/v1/"+CONFIG.booksTable+"?select=state&key=eq.primary";
+// Map between DB rows (snake_case) and JS book objects (camelCase).
+function dbRowToBook(row){
+  return {
+    id: row.id,
+    title: row.title,
+    author: row.author || "",
+    isbn: row.isbn || "",
+    coverUrl: row.cover_url || "",
+    totalPages: row.total_pages || 0,
+    _position: row.position || 0
+  };
+}
+function bookToDbRow(book, status, position){
+  return {
+    id: book.id,
+    title: book.title,
+    author: book.author,
+    isbn: book.isbn,
+    cover_url: book.coverUrl,
+    total_pages: book.totalPages,
+    status: status,
+    position: position
+  };
+}
+
+// --- Books -------------------------------------------------
+async function loadBookList(){
+  const url = CONFIG.supabaseUrl+"/rest/v1/"+CONFIG.booksTable+
+    "?select=id,title,author,isbn,cover_url,total_pages,status,position&order=position.desc";
   const res = await fetch(url, {headers: sbHeaders()});
   if(!res.ok) throw new Error("books fetch failed");
-  const arr = await res.json();
-  if(arr[0] && arr[0].state) return arr[0].state;
-  // No book list saved yet — start empty (add books via the Admin tab).
-  return { currentBook: null, pastBooks: [] };
+  const rows = await res.json();
+  const cur = rows.find(function(r){return r.status==="current";}) || null;
+  const past = rows.filter(function(r){return r.status==="past";})
+    .sort(function(a,b){return (b.position||0)-(a.position||0);})
+    .map(dbRowToBook);
+  return { currentBook: cur ? dbRowToBook(cur) : null, pastBooks: past };
 }
-async function saveBooks(books){
-  const body = { key:"primary", state: books, updated_at:new Date().toISOString() };
-  const url = CONFIG.supabaseUrl+"/rest/v1/"+CONFIG.booksTable+"?on_conflict=key";
+async function upsertBookRow(book, status, position){
+  const body = bookToDbRow(book, status, position);
+  const url = CONFIG.supabaseUrl+"/rest/v1/"+CONFIG.booksTable+"?on_conflict=id";
   const res = await fetch(url, {
     method:"POST",
     headers: sbHeaders({"Prefer":"resolution=merge-duplicates"}),
     body: JSON.stringify(body)
   });
-  if(!res.ok) throw new Error("books save failed");
+  if(!res.ok) throw new Error("book upsert failed");
+}
+async function deleteBookRow(id){
+  const url = CONFIG.supabaseUrl+"/rest/v1/"+CONFIG.booksTable+"?id=eq."+encodeURIComponent(id);
+  const res = await fetch(url, {method:"DELETE", headers: sbHeaders()});
+  if(!res.ok) throw new Error("book delete failed");
 }
 
+// --- Members -----------------------------------------------
+async function ensureMember(name){
+  // Upsert one row per reader; name lives here only.
+  const body = { user_id: uid, name: name || null };
+  const url = CONFIG.supabaseUrl+"/rest/v1/"+CONFIG.membersTable+"?on_conflict=user_id";
+  const res = await fetch(url, {
+    method:"POST",
+    headers: sbHeaders({"Prefer":"resolution=merge-duplicates"}),
+    body: JSON.stringify(body)
+  });
+  if(!res.ok) throw new Error("member upsert failed");
+}
+async function getMyMember(){
+  const url = CONFIG.supabaseUrl+"/rest/v1/"+CONFIG.membersTable+"?user_id=eq."+uid+"&select=name";
+  const res = await fetch(url, {headers: sbHeaders()});
+  if(!res.ok) throw new Error("member fetch failed");
+  const arr = await res.json();
+  return arr[0] || null;
+}
+async function getMembersMap(){
+  const url = CONFIG.supabaseUrl+"/rest/v1/"+CONFIG.membersTable+"?select=user_id,name";
+  const res = await fetch(url, {headers: sbHeaders()});
+  if(!res.ok) throw new Error("members fetch failed");
+  const arr = await res.json();
+  const m = {};
+  arr.forEach(function(r){ m[r.user_id] = r.name; });
+  return m;
+}
+
+// --- Ratings -----------------------------------------------
 async function getAllForBook(bookId){
-  const url = CONFIG.supabaseUrl+"/rest/v1/"+CONFIG.ratingsTable+"?book_id=eq."+encodeURIComponent(bookId)+"&select=user_id,rating,progress,finished";
+  const url = CONFIG.supabaseUrl+"/rest/v1/"+CONFIG.ratingsTable+
+    "?book_id=eq."+encodeURIComponent(bookId)+"&select=user_id,rating,progress,finished";
   const res = await fetch(url, {headers: sbHeaders()});
   if(!res.ok) throw new Error("fetch failed");
   return await res.json();
 }
 async function getMyRecord(bookId){
-  const url = CONFIG.supabaseUrl+"/rest/v1/"+CONFIG.ratingsTable+"?user_id=eq."+uid+"&book_id=eq."+encodeURIComponent(bookId)+"&select=rating,progress,finished,started_at,name";
+  const url = CONFIG.supabaseUrl+"/rest/v1/"+CONFIG.ratingsTable+
+    "?user_id=eq."+uid+"&book_id=eq."+encodeURIComponent(bookId)+"&select=rating,progress,finished,started_at";
   const res = await fetch(url, {headers: sbHeaders()});
   if(!res.ok) throw new Error("fetch failed");
   const arr = await res.json();
   return arr[0] || null;
 }
 async function getAllRecords(){
-  const url = CONFIG.supabaseUrl+"/rest/v1/"+CONFIG.ratingsTable+"?select=user_id,book_id,rating,progress,finished,started_at,updated_at,name";
+  const url = CONFIG.supabaseUrl+"/rest/v1/"+CONFIG.ratingsTable+
+    "?select=user_id,book_id,rating,progress,finished,started_at,updated_at";
   const res = await fetch(url, {headers: sbHeaders()});
   if(!res.ok) throw new Error("fetch failed");
   return await res.json();
@@ -525,8 +590,7 @@ async function saveRecord(bookId, fields){
     user_id:uid, book_id:bookId, updated_at:new Date().toISOString(),
     rating: fields.rating===undefined?null:fields.rating,
     progress: fields.progress===undefined?null:fields.progress,
-    finished: fields.finished===undefined?false:fields.finished,
-    name: fields.name===undefined?null:fields.name
+    finished: fields.finished===undefined?false:fields.finished
   }, fields.started_at ? {started_at: fields.started_at} : {});
   const url = CONFIG.supabaseUrl+"/rest/v1/"+CONFIG.ratingsTable+"?on_conflict=user_id,book_id";
   const res = await fetch(url, {
@@ -553,10 +617,6 @@ function daysBetween(a, b){
   if(!a || !b) return 0;
   const ms = new Date(b).getTime() - new Date(a).getTime();
   return Math.max(1, ms/86400000);
-}
-function displayName(user_id, name){
-  if(name) return name;
-  return "Reader";
 }
 
 /* ============================================================ */
@@ -663,11 +723,12 @@ function loadRatePanel(){
   document.getElementById("rate-author").textContent = cur ? "by " + cur.author : "";
   document.getElementById("pages-of").textContent = cur ? "/ "+cur.totalPages+" pages" : "/ — pages";
   if(!cur){ document.getElementById("rate-stars").innerHTML=""; return; }
-  getMyRecord(cur.id).then(function(my){
+  Promise.all([getMyRecord(cur.id), getMyMember()]).then(function(results){
+    const my = results[0], mem = results[1];
     state.myRating = (my && my.rating) || 0;
     state.myProgress = (my && my.progress) || 0;
     state.myFinished = !!(my && my.finished);
-    state.myName = (my && my.name) || "";
+    state.myName = (mem && mem.name) || "";
     state.existingStartedAt = (my && my.started_at) || null;
     document.getElementById("my-name").value = state.myName;
     document.getElementById("pages").value = state.myProgress || "";
@@ -706,11 +767,13 @@ async function doSave(forceFinished){
   state.myName = name;
   const now = new Date().toISOString();
   const setStartedAt = (!state.existingStartedAt && p>0) ? now : null;
-  const fields = { rating: state.myRating || null, progress: finished ? cur.totalPages : p, finished: finished, name: name };
+  const fields = { rating: state.myRating || null, progress: finished ? cur.totalPages : p, finished: finished };
   if(setStartedAt) fields.started_at = setStartedAt;
   if(finished){ document.getElementById("pages").value = cur.totalPages; updatePct(); }
   try{
-    await saveRecord(cur.id, fields);
+    const tasks = [saveRecord(cur.id, fields)];
+    if(name) tasks.push(ensureMember(name));   // store name once, in members
+    await Promise.all(tasks);
     state.existingStartedAt = state.existingStartedAt || setStartedAt;
     document.getElementById("saved").classList.add("show");
     setTimeout(function(){document.getElementById("saved").classList.remove("show");}, 2000);
@@ -726,29 +789,27 @@ async function renderStats(){
   const el = document.getElementById("stats-body");
   el.innerHTML = '<tr><td colspan="5" class="empty">Loading…</td></tr>';
   try{
-    const recs = await getAllRecords();
+    const results = await Promise.all([getAllRecords(), getMembersMap()]);
+    const recs = results[0], members = results[1];
     const bp = {};
     if(BOOKS && BOOKS.currentBook) bp[BOOKS.currentBook.id]=BOOKS.currentBook.totalPages;
     (BOOKS && BOOKS.pastBooks || []).forEach(function(b){ bp[b.id]=b.totalPages; });
     const byUser = {};
     recs.forEach(function(r){
-      if(!byUser[r.user_id]) byUser[r.user_id]={name:null, nameUpdated:0, ratings:[], speeds:[]};
-      const u = byUser[r.user_id];
-      const tu = new Date(r.updated_at||0).getTime();
-      if(r.name && tu>u.nameUpdated){ u.name=r.name; u.nameUpdated=tu; }
-      if(r.rating!=null && r.rating>0) u.ratings.push(r.rating);
-      if(r.finished && bp[r.book_id]){ u.speeds.push(bp[r.book_id]/daysBetween(r.started_at, r.updated_at)); }
+      if(!byUser[r.user_id]) byUser[r.user_id]={ratings:[], speeds:[]};
+      if(r.rating!=null && r.rating>0) byUser[r.user_id].ratings.push(r.rating);
+      if(r.finished && bp[r.book_id]){ byUser[r.user_id].speeds.push(bp[r.book_id]/daysBetween(r.started_at, r.updated_at)); }
     });
     const rows = Object.keys(byUser).map(function(uid2){
       const u = byUser[uid2];
       const avgR = u.ratings.length ? u.ratings.reduce(function(s,x){return s+x;},0)/u.ratings.length : null;
       const avgS = u.speeds.length ? u.speeds.reduce(function(s,x){return s+x;},0)/u.speeds.length : null;
-      return {uid:uid2, name:u.name, avgR:avgR, avgS:avgS, ratedCount:u.ratings.length, finishedCount:u.speeds.length};
+      return {uid:uid2, name:(members[uid2]||null), avgR:avgR, avgS:avgS, ratedCount:u.ratings.length, finishedCount:u.speeds.length};
     });
     rows.sort(function(a,b){return (b.avgS||0)-(a.avgS||0);});
     if(!rows.length){ el.innerHTML='<tr><td colspan="5" class="empty">No readers yet. Rate a book to appear here.</td></tr>'; return; }
     el.innerHTML = rows.map(function(r){
-      const name = displayName(r.uid, r.name) + (r.uid===uid ? " (you)" : "");
+      const name = (r.name || "Reader") + (r.uid===uid ? " (you)" : "");
       const initial = (name.charAt(0)||"?").toUpperCase();
       return '<tr class="'+(r.uid===uid?'you':'')+'">'+
         '<td class="name"><span class="avatar">'+initial+'</span>'+esc(name)+'</td>'+
@@ -782,7 +843,6 @@ function tryUnlock(){
   const err = document.getElementById("gate-err");
   if(val === CONFIG.adminPasscode){
     adminUnlocked = true;
-    document.querySelector('.tab.admin-tab').style.display="inline-block";
     showAdminContent();
     renderAdminTables();
   } else {
@@ -844,8 +904,8 @@ document.getElementById("autofill-btn").addEventListener("click", async function
   }
 });
 
-/* --- Add book ---------------------------------------------- */
-document.getElementById("add-btn").addEventListener("click", function(){
+/* --- Add / edit book (granular per-row DB writes) ---------- */
+document.getElementById("add-btn").addEventListener("click", async function(){
   const title = document.getElementById("f-title").value.trim();
   const author = document.getElementById("f-author").value.trim();
   const isbn = document.getElementById("f-isbn").value.trim();
@@ -857,20 +917,18 @@ document.getElementById("add-btn").addEventListener("click", function(){
   if(!title){ status.className="lookup-status err"; status.textContent="Title is required."; return; }
   if(!pages || pages<1){ status.className="lookup-status err"; status.textContent="Enter a valid page count."; return; }
   const book = { id: slugify(title)+"-"+Math.random().toString(36).slice(2,5), title:title, author:author, isbn:isbn, totalPages:pages, coverUrl:coverUrl };
-  addOrUpdateBook(book, section, function(ok){
-    if(ok){
-      status.className="lookup-status ok"; status.textContent="Added ✓";
-      document.getElementById("f-title").value=""; document.getElementById("f-author").value="";
-      document.getElementById("f-isbn").value=""; document.getElementById("f-pages").value=""; document.getElementById("f-cover").value="";
-      document.getElementById("add-btn").textContent="Add book";
-      renderAdminTables(); refreshCurrent(); renderPast();
-    } else {
-      status.className="lookup-status err"; status.textContent="Could not save. Try again.";
-    }
-  });
+  try{
+    await addOrUpdateBook(book, section);
+    status.className="lookup-status ok"; status.textContent="Saved ✓";
+    document.getElementById("f-title").value=""; document.getElementById("f-author").value="";
+    document.getElementById("f-isbn").value=""; document.getElementById("f-pages").value=""; document.getElementById("f-cover").value="";
+    document.getElementById("add-btn").textContent="Add book";
+    renderAdminTables(); refreshCurrent(); renderPast();
+  }catch(e){
+    status.className="lookup-status err"; status.textContent="Could not save. Try again.";
+  }
 });
 
-/* --- Edit / delete ----------------------------------------- */
 let editingKey = null;
 function openEdit(key){
   let book = null;
@@ -888,42 +946,83 @@ function openEdit(key){
   document.getElementById("lookup-status").className="lookup-status";
   window.scrollTo({top: document.querySelector(".admin-card").offsetTop - 20, behavior:"smooth"});
 }
-function addOrUpdateBook(book, section, cb){
+
+async function addOrUpdateBook(book, section){
+  // Position key for "newest first" ordering of past books (bigint ms timestamp).
+  const nowPos = Date.now();
   if(editingKey){
     if(editingKey==="current"){
-      if(section==="current"){ book.id = BOOKS.currentBook.id; BOOKS.currentBook = book; }
-      else { deleteBook("current"); BOOKS.pastBooks.unshift(book); }
+      if(section==="current"){            // edit current, stays current
+        book.id = BOOKS.currentBook.id;
+        BOOKS.currentBook = book;
+        await upsertBookRow(book, "current", 0);
+      } else {                            // current demoted to past
+        book.id = BOOKS.currentBook.id;
+        book._position = nowPos;
+        BOOKS.pastBooks.unshift(book);
+        BOOKS.currentBook = null;
+        await upsertBookRow(book, "past", nowPos);
+      }
     } else {
       const idx = BOOKS.pastBooks.findIndex(function(b){return b.id===editingKey;});
       if(idx>=0){
-        if(section==="current"){ BOOKS.pastBooks.splice(idx,1); book.id = BOOKS.currentBook ? BOOKS.currentBook.id : book.id; BOOKS.currentBook = book; }
-        else { book.id = BOOKS.pastBooks[idx].id; BOOKS.pastBooks[idx] = book; }
+        if(section==="current"){          // past promoted to current
+          if(BOOKS.currentBook){
+            BOOKS.currentBook._position = nowPos;
+            BOOKS.pastBooks.unshift(BOOKS.currentBook);
+            await upsertBookRow(BOOKS.currentBook, "past", nowPos);
+          }
+          BOOKS.pastBooks.splice(idx,1);
+          book.id = editingKey;
+          BOOKS.currentBook = book;
+          await upsertBookRow(book, "current", 0);
+        } else {                           // edit past, stays past (keep its order)
+          book.id = editingKey;
+          book._position = BOOKS.pastBooks[idx]._position;
+          BOOKS.pastBooks[idx] = book;
+          await upsertBookRow(book, "past", book._position || nowPos);
+        }
       }
     }
     editingKey = null;
     document.getElementById("add-btn").textContent="Add book";
   } else {
-    if(section==="current"){
-      if(BOOKS.currentBook){ BOOKS.pastBooks.unshift(BOOKS.currentBook); }
+    if(section==="current"){              // new current; demote old current
+      if(BOOKS.currentBook){
+        BOOKS.currentBook._position = nowPos;
+        BOOKS.pastBooks.unshift(BOOKS.currentBook);
+        await upsertBookRow(BOOKS.currentBook, "past", nowPos);
+      }
       BOOKS.currentBook = book;
-    } else {
+      await upsertBookRow(book, "current", 0);
+    } else {                              // new past book
+      book._position = nowPos;
       BOOKS.pastBooks.unshift(book);
+      await upsertBookRow(book, "past", nowPos);
     }
   }
-  saveBooks(BOOKS).then(function(){ cb(true); }).catch(function(){ cb(false); });
 }
-function deleteBook(key){
-  if(!confirm("Delete this book? Its saved ratings stay but won't show until re-added.")) return;
-  if(key==="current"){ BOOKS.currentBook = null; }
-  else { const idx = BOOKS.pastBooks.findIndex(function(b){return b.id===key;}); if(idx>=0) BOOKS.pastBooks.splice(idx,1); }
-  if(editingKey===key){ editingKey=null; document.getElementById("add-btn").textContent="Add book"; }
-  saveBooks(BOOKS).then(function(){ renderAdminTables(); refreshCurrent(); renderPast(); });
+
+async function deleteBook(key){
+  if(!confirm("Delete this book? Its ratings are also removed (foreign-key cascade).")) return;
+  try{
+    if(key==="current"){
+      if(BOOKS.currentBook){ await deleteBookRow(BOOKS.currentBook.id); BOOKS.currentBook = null; }
+    } else {
+      const idx = BOOKS.pastBooks.findIndex(function(b){return b.id===key;});
+      if(idx>=0){ await deleteBookRow(key); BOOKS.pastBooks.splice(idx,1); }
+    }
+    if(editingKey===key){ editingKey=null; document.getElementById("add-btn").textContent="Add book"; }
+    renderAdminTables(); refreshCurrent(); renderPast();
+  }catch(e){
+    alert("Could not delete. Check your Supabase setup.");
+  }
 }
 
 /* ============================================================ */
 /* --- Boot --------------------------------------------------- */
 (async function boot(){
-  try{ BOOKS = await loadBooks(); }
+  try{ BOOKS = await loadBookList(); }
   catch(e){ BOOKS = { currentBook:null, pastBooks:[] }; }
   if(!BOOKS.pastBooks) BOOKS.pastBooks=[];
   if(!BOOKS.currentBook) BOOKS.currentBook=null;

@@ -49,7 +49,6 @@
     color:var(--ink);
     letter-spacing:.5px;
   }
-  .tagline{color:var(--ink-soft);font-style:italic;font-family:var(--serif);font-size:15px}
 
   nav.tabs{
     max-width:980px;margin:0 auto;padding:18px 20px 0;
@@ -144,6 +143,13 @@
   .err{color:#b23b2e;font-size:13px;margin-top:8px}
   .rate-side{text-align:center}
   .rate-side img{width:200px;max-width:60vw;aspect-ratio:2/3;border-radius:6px;box-shadow:0 18px 30px -16px rgba(0,0,0,.5);object-fit:cover}
+  textarea{width:100%;padding:9px 12px;border:1px solid var(--line);border-radius:8px;font-size:15px;font-family:var(--sans);background:#fff;resize:vertical}
+  .reviews{margin-top:26px;text-align:left;display:grid;gap:12px}
+  .reviews:empty{display:none}
+  .reviews-title{font-family:var(--serif);font-size:18px;margin:0 0 4px}
+  .review-item{background:var(--paper-2);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+  .review-item .who{font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);margin-bottom:6px}
+  .review-item .what{font-family:var(--serif);font-size:15px;line-height:1.55;white-space:pre-wrap}
 
   /* Stats */
   .stats-note{color:var(--ink-soft);font-size:13px;font-family:var(--serif);font-style:italic;margin:-8px 0 18px}
@@ -194,9 +200,8 @@
 </head>
 <body>
 <header class="site">
-  <div class="crest"><span class="dot"></span> Est. 2026 <span class="dot"></span></div>
+  <div class="crest"><span class="dot"></span> Est. 2025 <span class="dot"></span></div>
   <h1 class="club" id="club-name">Booked and Busy</h1>
-  <div class="tagline">A shared shelf, read together.</div>
 </header>
 
 <nav class="tabs">
@@ -220,6 +225,7 @@
       </div>
       <div class="status-pill" id="cur-status"></div>
       <div class="cta-rate"><button class="btn btn-primary" data-go="rate">Rate this book &amp; update progress</button></div>
+      <div class="reviews" id="cur-reviews"></div>
     </div>
   </section>
 
@@ -261,9 +267,13 @@
           <label class="toggle-fin"><input type="checkbox" id="finished"> I’ve finished reading</label>
         </div>
 
+        <div class="field">
+          <label>Your review (optional)</label>
+          <textarea id="review" rows="3" maxlength="600" placeholder="Share a few thoughts on this book"></textarea>
+        </div>
+
         <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
           <button class="btn btn-primary" id="save">Save</button>
-          <button class="btn btn-ghost" id="finished-btn">Mark as finished</button>
           <span class="saved" id="saved">Saved ✓</span>
         </div>
         <div class="err" id="err"></div>
@@ -565,14 +575,14 @@ async function getMembersMap(){
 // --- Ratings -----------------------------------------------
 async function getAllForBook(bookId){
   const url = CONFIG.supabaseUrl+"/rest/v1/"+CONFIG.ratingsTable+
-    "?book_id=eq."+encodeURIComponent(bookId)+"&select=user_id,rating,progress,finished";
+    "?book_id=eq."+encodeURIComponent(bookId)+"&select=user_id,rating,progress,finished,review,updated_at";
   const res = await fetch(url, {headers: sbHeaders()});
   if(!res.ok) throw new Error("fetch failed");
   return await res.json();
 }
 async function getMyRecord(bookId){
   const url = CONFIG.supabaseUrl+"/rest/v1/"+CONFIG.ratingsTable+
-    "?user_id=eq."+uid+"&book_id=eq."+encodeURIComponent(bookId)+"&select=rating,progress,finished,started_at";
+    "?user_id=eq."+uid+"&book_id=eq."+encodeURIComponent(bookId)+"&select=rating,progress,finished,started_at,review";
   const res = await fetch(url, {headers: sbHeaders()});
   if(!res.ok) throw new Error("fetch failed");
   const arr = await res.json();
@@ -590,7 +600,8 @@ async function saveRecord(bookId, fields){
     user_id:uid, book_id:bookId, updated_at:new Date().toISOString(),
     rating: fields.rating===undefined?null:fields.rating,
     progress: fields.progress===undefined?null:fields.progress,
-    finished: fields.finished===undefined?false:fields.finished
+    finished: fields.finished===undefined?false:fields.finished,
+    review: fields.review===undefined?null:fields.review
   }, fields.started_at ? {started_at: fields.started_at} : {});
   const url = CONFIG.supabaseUrl+"/rest/v1/"+CONFIG.ratingsTable+"?on_conflict=user_id,book_id";
   const res = await fetch(url, {
@@ -645,7 +656,7 @@ function renderStarsInput(el, value){
 
 /* ============================================================ */
 /* --- State + wiring ---------------------------------------- */
-const state = { myRating:0, myProgress:0, myFinished:false, myName:"", existingStartedAt:null };
+const state = { myRating:0, myProgress:0, myFinished:false, myName:"", myReview:"", existingStartedAt:null };
 let BOOKS = null;
 let adminUnlocked = false;
 
@@ -676,7 +687,8 @@ function refreshCurrent(){
     document.getElementById("cur-status").textContent="";
     return;
   }
-  getAllForBook(cur.id).then(function(recs){
+  Promise.all([getAllForBook(cur.id), getMembersMap()]).then(function(results){
+    const recs = results[0], names = results[1];
     const a = aggregate(recs);
     renderStarsStatic(document.getElementById("cur-stars"), a.avg);
     document.getElementById("cur-num").textContent = a.avg ? a.avg.toFixed(1) : "—";
@@ -689,7 +701,20 @@ function refreshCurrent(){
       else if(my.rating) pill = "You rated this book";
     }
     document.getElementById("cur-status").textContent = pill;
+    renderReviews(recs, names);
   }).catch(function(){ document.getElementById("cur-count").textContent = "· unavailable"; });
+}
+function renderReviews(recs, names){
+  const el = document.getElementById("cur-reviews");
+  if(!el) return;
+  const items = recs.filter(function(r){return r.review && String(r.review).trim();});
+  if(!items.length){ el.innerHTML=""; return; }
+  items.sort(function(a,b){return new Date(b.updated_at||0)-new Date(a.updated_at||0);});
+  el.innerHTML = '<h3 class="reviews-title">What members said</h3>' +
+    items.map(function(r){
+      const who = esc(names[r.user_id] || "A reader");
+      return '<div class="review-item"><div class="who">'+who+'</div><div class="what">'+esc(String(r.review).trim())+'</div></div>';
+    }).join("");
 }
 function renderPast(){
   const grid = document.getElementById("past-grid");
@@ -722,18 +747,20 @@ function loadRatePanel(){
   document.getElementById("rate-title").textContent = cur ? cur.title : "No current book";
   document.getElementById("rate-author").textContent = cur ? "by " + cur.author : "";
   document.getElementById("pages-of").textContent = cur ? "/ "+cur.totalPages+" pages" : "/ — pages";
-  if(!cur){ document.getElementById("rate-stars").innerHTML=""; return; }
+  if(!cur){ document.getElementById("rate-stars").innerHTML=""; document.getElementById("review").value=""; return; }
   Promise.all([getMyRecord(cur.id), getMyMember()]).then(function(results){
     const my = results[0], mem = results[1];
     state.myRating = (my && my.rating) || 0;
     state.myProgress = (my && my.progress) || 0;
     state.myFinished = !!(my && my.finished);
     state.myName = (mem && mem.name) || "";
+    state.myReview = (my && my.review) || "";
     state.existingStartedAt = (my && my.started_at) || null;
     document.getElementById("my-name").value = state.myName;
     document.getElementById("pages").value = state.myProgress || "";
     document.getElementById("range").value = Math.min(100, Math.round(state.myProgress/cur.totalPages*100));
     document.getElementById("finished").checked = state.myFinished;
+    document.getElementById("review").value = state.myReview;
     renderStarsInput(document.getElementById("rate-stars"), state.myRating);
     updatePct();
   }).catch(function(){ renderStarsInput(document.getElementById("rate-stars"), 0); });
@@ -767,7 +794,9 @@ async function doSave(forceFinished){
   state.myName = name;
   const now = new Date().toISOString();
   const setStartedAt = (!state.existingStartedAt && p>0) ? now : null;
-  const fields = { rating: state.myRating || null, progress: finished ? cur.totalPages : p, finished: finished };
+  const review = document.getElementById("review").value.trim();
+  state.myReview = review;
+  const fields = { rating: state.myRating || null, progress: finished ? cur.totalPages : p, finished: finished, review: review || null };
   if(setStartedAt) fields.started_at = setStartedAt;
   if(finished){ document.getElementById("pages").value = cur.totalPages; updatePct(); }
   try{
@@ -782,7 +811,6 @@ async function doSave(forceFinished){
   }catch(e){ errEl.textContent = "Could not save. Check your Supabase setup and connection."; }
 }
 document.getElementById("save").addEventListener("click", function(){doSave();});
-document.getElementById("finished-btn").addEventListener("click", function(){doSave(true);});
 
 /* --- Reader stats ------------------------------------------ */
 async function renderStats(){

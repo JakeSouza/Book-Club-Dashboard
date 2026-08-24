@@ -154,7 +154,7 @@
   .field{margin-bottom:24px}
   .field label{display:block;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-soft);margin-bottom:10px}
   .progress-controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-  input[type=number],input[type=text],input[type=password]{padding:9px 12px;border:1px solid var(--line);border-radius:9px;font-size:15px;font-family:var(--sans);background:#fbfaf3}
+  input[type=number],input[type=text],input[type=password],input[type=email]{padding:9px 12px;border:1px solid var(--line);border-radius:9px;font-size:15px;font-family:var(--sans);background:#fbfaf3}
   input[type=number]{width:84px}
   input[type=text],input[type=password]{width:100%}
   input[type=range]{flex:1;min-width:160px;accent-color:var(--plum)}
@@ -1128,7 +1128,7 @@ async function buildRecommendations(){
   const grid = document.getElementById("rec-grid");
   const status = document.getElementById("rec-status");
   grid.innerHTML = "";
-  setRecStatus("", "Reading "+whose+"'s ratings…");
+  setRecStatus("", "Reading the ratings…");
   try{
     if(!BOOKS){ BOOKS = await loadBookList(); }
     const all = (BOOKS.currentBook?[BOOKS.currentBook]:[]).concat(BOOKS.pastBooks||[]);
@@ -1139,6 +1139,7 @@ async function buildRecommendations(){
     const sourceSel = document.getElementById("rec-source");
     const sourceUid = sourceSel && sourceSel.value && sourceSel.value!=="club" ? sourceSel.value : null;
     const filtered = sourceUid ? recs.filter(function(r){return r.user_id===sourceUid;}) : recs;
+   const whose = sourceUid ? "this member" : "your club";
     // Average rating per book (group) or that member's own rating.
     const byBook = {};
     filtered.forEach(function(r){
@@ -1150,7 +1151,6 @@ async function buildRecommendations(){
     const ranked = Object.keys(byBook).map(function(id){
       return { id:id, avg: byBook[id].sum/byBook[id].n, n: byBook[id].n };
     }).filter(function(x){return x.n>=1;}).sort(function(a,b){return b.avg-a.avg;}).slice(0,4);
-    const whose = sourceUid ? "this member" : "your club";
 
     if(!ranked.length){
       grid.innerHTML = '<div class="empty">No ratings yet for '+whose+'. Rate a few books first — suggestions are based on what was loved.</div>';

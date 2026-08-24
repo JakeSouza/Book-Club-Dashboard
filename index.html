@@ -70,6 +70,7 @@
     letter-spacing:.5px;
     text-shadow:0 1px 0 rgba(255,255,255,.5);
   }
+  .tagline{color:var(--ink-soft);font-style:italic;font-family:var(--serif);font-size:15px}
 
   nav.tabs{
     max-width:980px;margin:0 auto;padding:18px 20px 0;
@@ -223,8 +224,9 @@
 </head>
 <body>
 <header class="site">
-  <div class="crest"><span class="dot"></span> Est. 2025 <span class="dot"></span></div>
+  <div class="crest"><span class="dot"></span> Est. 2026 <span class="dot"></span></div>
   <h1 class="club" id="club-name">Booked and Busy</h1>
+  <div class="tagline">Book Clerb.</div>
 </header>
 
 <nav class="tabs">
@@ -847,17 +849,20 @@ async function renderStats(){
     (BOOKS && BOOKS.pastBooks || []).forEach(function(b){ bp[b.id]=b.totalPages; });
     const byUser = {};
     recs.forEach(function(r){
-      if(!byUser[r.user_id]) byUser[r.user_id]={ratings:[], speeds:[]};
+      if(!byUser[r.user_id]) byUser[r.user_id]={ratings:[], pages:0, finishedCount:0};
       if(r.rating!=null && r.rating>0) byUser[r.user_id].ratings.push(r.rating);
-      if(r.finished && bp[r.book_id]){ byUser[r.user_id].speeds.push(bp[r.book_id]/daysBetween(r.started_at, r.updated_at)); }
+      // count progress toward pages read; cap at the book's total pages
+      const tp = bp[r.book_id] || 0;
+      const p = (r.progress!=null && r.progress>0) ? Math.min(r.progress, tp || r.progress) : 0;
+      byUser[r.user_id].pages += p;
+      if(r.finished) byUser[r.user_id].finishedCount += 1;
     });
     const rows = Object.keys(byUser).map(function(uid2){
       const u = byUser[uid2];
       const avgR = u.ratings.length ? u.ratings.reduce(function(s,x){return s+x;},0)/u.ratings.length : null;
-      const avgS = u.speeds.length ? u.speeds.reduce(function(s,x){return s+x;},0)/u.speeds.length : null;
-      return {uid:uid2, name:(members[uid2]||null), avgR:avgR, avgS:avgS, ratedCount:u.ratings.length, finishedCount:u.speeds.length};
+      return {uid:uid2, name:(members[uid2]||null), avgR:avgR, pages:u.pages, ratedCount:u.ratings.length, finishedCount:u.finishedCount};
     });
-    rows.sort(function(a,b){return (b.avgS||0)-(a.avgS||0);});
+    rows.sort(function(a,b){return b.pages-a.pages;});
     if(!rows.length){ el.innerHTML='<tr><td colspan="5" class="empty">No readers yet. Rate a book to appear here.</td></tr>'; return; }
     el.innerHTML = rows.map(function(r){
       const name = (r.name || "Reader") + (r.uid===uid ? " (you)" : "");
@@ -867,7 +872,7 @@ async function renderStats(){
         '<td>'+r.ratedCount+'</td>'+
         '<td>'+(r.avgR!=null ? r.avgR.toFixed(1)+' <span class="star-s">★</span>' : '—')+'</td>'+
         '<td>'+r.finishedCount+'</td>'+
-        '<td class="num">'+(r.avgS!=null ? Math.round(r.avgS)+' pp/day' : '—')+'</td>'+
+        '<td class="num">'+(r.pages>0 ? r.pages.toLocaleString()+' pp' : '—')+'</td>'+
       '</tr>';
     }).join("");
   }catch(e){ el.innerHTML='<tr><td colspan="5" class="empty">Could not load stats.</td></tr>'; }

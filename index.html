@@ -565,10 +565,11 @@ function sbHeaders(extra){ return authHeaders(extra); }
 
 // ---- Session bootstrap (Supabase persists the JWT in localStorage itself) ----
 async function restoreSession(){
+  if(!CONFIG.supabaseUrl){ renderAuthBar(); return; }  // no backend configured — still show the sign-in bar
   try{
     const res = await fetch(CONFIG.supabaseUrl+SB_AUTH+"user", { headers: authHeaders() });
     if(res.ok){ const u = await res.json(); setSession(u, null, true); }
-  }catch(e){}
+  }catch(e){ renderAuthBar(); }  // fetch failed (e.g. empty URL) — still render the sign-in bar
 }
 function setSession(user, token, silent){
   currentUser = user; uid = user ? user.id : null;
@@ -687,7 +688,11 @@ async function upsertBookRow(book, status, position){
     headers: sbHeaders({"Prefer":"resolution=merge-duplicates"}),
     body: JSON.stringify(body)
   });
-  if(!res.ok) throw new Error("book upsert failed");
+  if(!res.ok){
+    let detail=res.status+" "+res.statusText;
+    try{const j=await res.json(); detail+=" — "+(j.message||j.error_description||j.error||JSON.stringify(j));}catch(e){}
+    throw new Error("book upsert failed ("+detail+")");
+  }
 }
 async function deleteBookRow(id){
   const url = CONFIG.supabaseUrl+"/rest/v1/"+CONFIG.booksTable+"?id=eq."+encodeURIComponent(id);
@@ -1430,6 +1435,7 @@ document.getElementById("autofill-btn").addEventListener("click", async function
 
 /* --- Add / edit book (granular per-row DB writes) ---------- */
 document.getElementById("add-btn").addEventListener("click", async function(){
+ if(!uid){ const st=document.getElementById("lookup-status"); st.className="lookup-status err"; st.textContent="Sign in (top bar) first — adding books requires a signed-in member."; return; }
   const title = document.getElementById("f-title").value.trim();
   const author = document.getElementById("f-author").value.trim();
   const isbn = document.getElementById("f-isbn").value.trim();
@@ -1449,7 +1455,7 @@ document.getElementById("add-btn").addEventListener("click", async function(){
     document.getElementById("add-btn").textContent="Add book";
     renderAdminTables(); refreshCurrent(); renderPast();
   }catch(e){
-    status.className="lookup-status err"; status.textContent="Could not save. Try again.";
+   status.className="lookup-status err"; status.textContent="Could not save: "+(e.message||"Try again.");
   }
 });
 
@@ -1546,6 +1552,7 @@ async function deleteBook(key){
 /* ============================================================ */
 /* --- Boot --------------------------------------------------- */
 (async function boot(){
+  renderAuthBar();   // always show the sign-in bar immediately
   await restoreSession();   // sets uid + authToken if a session exists
   try{ BOOKS = await loadBookList(); }
   catch(e){ BOOKS = { currentBook:null, pastBooks:[] }; }

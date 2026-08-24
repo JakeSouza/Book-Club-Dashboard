@@ -240,14 +240,20 @@
   .lookup-status.ok{color:#2f7d52}
   .lookup-status.err{color:#b23b2e}
 
+  .auth-bar{margin-top:14px;display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;font-size:14px}
+  .auth-bar input[type=email],.auth-bar input[type=password]{width:auto;min-width:150px;max-width:60vw}
+  .auth-bar .who{color:var(--moss-dark);font-weight:700;font-family:var(--serif)}
+  .auth-bar .auth-err{color:#b23b2e;font-size:12px;min-height:14px;width:100%;text-align:center;margin-top:2px}
+  .rate-locked{text-align:center;color:var(--ink-soft);font-style:italic;font-family:var(--serif);padding:40px 20px;background:var(--paper-2);border:1px solid var(--line);border-radius:16px}
   footer{text-align:center;color:var(--ink-soft);font-size:12.5px;padding:30px 20px;border-top:1px solid var(--line);font-family:var(--serif)}
 </style>
 </head>
 <body>
 <header class="site">
-  <div class="crest"><span class="dot"></span> Est. 2026 <span class="dot"></span></div>
+  <div class="crest"><span class="dot"></span> Est. 2025 <span class="dot"></span></div>
   <h1 class="club" id="club-name">Booked and Busy</h1>
-  <div class="tagline">It's a book clerb.</div>
+  <div class="tagline">A book clerb.</div>
+  <div id="auth-bar" class="auth-bar"></div>
 </header>
 
 <nav class="tabs">
@@ -282,6 +288,7 @@
   </section>
 
   <section class="panel" id="panel-rate">
+    <div id="rate-locked" class="rate-locked" style="display:none">Sign in above to rate this book and track your progress. Your ratings follow you across devices.</div>
     <div class="rate-grid">
       <div class="rate-side">
         <img id="rate-cover" alt="Book cover">
@@ -351,10 +358,10 @@
 
   <section class="panel" id="panel-stats">
     <h2 class="section-title">Reader stats</h2>
-    <p class="stats-note">Reading speed = pages read ÷ days from start to finish, averaged over each member’s finished books.</p>
+    <p class="stats-note">Total pages read counts your progress across every book you've started — no need to finish.</p>
     <div class="stats-wrap">
       <table class="stats-table">
-        <thead><tr><th>Member</th><th>Books rated</th><th>Avg rating</th><th>Finished</th><th>Avg reading speed</th></tr></thead>
+        <thead><tr><th>Member</th><th>Books rated</th><th>Avg rating</th><th>Finished</th><th>Total pages read</th></tr></thead>
         <tbody id="stats-body"><tr><td colspan="5" class="empty">Open this tab to load…</td></tr></tbody>
       </table>
     </div>
@@ -539,26 +546,102 @@ async function lookupByIsbn(isbn){
 }
 
 /* ============================================================ */
-/* --- User identity ----------------------------------------- */
-function getUserId(){
-  let id = localStorage.getItem("bc_user_id");
-  if(!id){ id = "u_"+Math.random().toString(36).slice(2,10); localStorage.setItem("bc_user_id", id); }
-  return id;
+/* --- Auth: Supabase email/password (cross-device identity) -- */
+// uid = signed-in user's uuid (auth.uid()), or null when logged out.
+let uid = null;
+let currentUser = null;   // { id, email }
+let authToken = null;     // JWT for authenticated writes
+
+const SB_AUTH = "/auth/v1/";
+
+function authHeaders(extra){
+  const h = { "apikey": CONFIG.supabaseAnonKey, "Content-Type": "application/json" };
+  if(authToken) h["Authorization"] = "Bearer " + authToken;
+  else h["Authorization"] = "Bearer " + CONFIG.supabaseAnonKey;
+  return Object.assign(h, extra||{});
 }
+// Data-layer headers: use the user token when signed in, anon key otherwise.
+function sbHeaders(extra){ return authHeaders(extra); }
 
-/* ============================================================ */
-/* --- Data layer (Supabase REST, normalized schema) --------- */
-const uid = getUserId();
-
-function sbHeaders(extra){
-  return Object.assign({
-    "apikey": CONFIG.supabaseAnonKey,
-    "Authorization": "Bearer " + CONFIG.supabaseAnonKey,
-    "Content-Type": "application/json"
-  }, extra||{});
+// ---- Session bootstrap (Supabase persists the JWT in localStorage itself) ----
+async function restoreSession(){
+  try{
+    const res = await fetch(CONFIG.supabaseUrl+SB_AUTH+"user", { headers: authHeaders() });
+    if(res.ok){ const u = await res.json(); setSession(u, null, true); }
+  }catch(e){}
 }
-
-// Map between DB rows (snake_case) and JS book objects (camelCase).
+function setSession(user, token, silent){
+  currentUser = user; uid = user ? user.id : null;
+  if(token){ authToken = token; try{ localStorage.setItem("bc_access_token", token); }catch(e){} }
+  if(!user){ authToken = null; try{ localStorage.removeItem("bc_access_token"); }catch(e){} }
+  renderAuthBar();
+  // Re-render anything that depends on "you".
+  refreshCurrent(); renderPast();
+  const active = document.querySelector(".tab.active");
+  if(active) activate(active.dataset.tab);
+}
+// ---- Sign up / sign in / sign out ----
+async function authSignUp(email, password){
+  const res = await fetch(CONFIG.supabaseUrl+SB_AUTH+"signup", {
+    method:"POST", headers: authHeaders(),
+    body: JSON.stringify({ email:email, password:password })
+  });
+  const data = await res.json();
+  if(!res.ok) throw new Error(data.msg || data.error_description || data.error || "Sign up failed");
+  // some configs require email confirm; if so, no access_token
+  if(data.access_token) setSession(data.user, data.access_token);
+  return data;
+}
+async function authSignIn(email, password){
+  const res = await fetch(CONFIG.supabaseUrl+SB_AUTH+"token?grant_type=password", {
+    method:"POST", headers: authHeaders(),
+    body: JSON.stringify({ email:email, password:password })
+  });
+  const data = await res.json();
+  if(!res.ok) throw new Error(data.msg || data.error_description || data.error || "Sign in failed");
+  setSession(data.user, data.access_token);
+}
+async function authSignOut(){
+  try{ await fetch(CONFIG.supabaseUrl+SB_AUTH+"logout?scope=global", { method:"POST", headers: authHeaders() }); }catch(e){}
+  setSession(null, null);
+}
+// ---- Header auth bar UI ----
+function renderAuthBar(){
+  const bar = document.getElementById("auth-bar");
+  if(!bar) return;
+  if(currentUser){
+    bar.innerHTML =
+      '<span class="who">👋 ' + esc(currentUser.email) + '</span>' +
+      '<button class="btn btn-ghost btn-sm" id="signout-btn">Sign out</button>';
+    document.getElementById("signout-btn").addEventListener("click", authSignOut);
+    return;
+  }
+  bar.innerHTML =
+    '<input type="email" id="auth-email" placeholder="email" autocomplete="username">' +
+    '<input type="password" id="auth-pass" placeholder="password" autocomplete="current-password">' +
+    '<button class="btn btn-primary btn-sm" id="signin-btn">Sign in</button>' +
+    '<button class="btn btn-ghost btn-sm" id="signup-btn">Sign up</button>' +
+    '<span class="auth-err" id="auth-err"></span>';
+  const err = document.getElementById("auth-err");
+  document.getElementById("signin-btn").addEventListener("click", async function(){
+    err.textContent=""; const e=document.getElementById("auth-email").value.trim(), p=document.getElementById("auth-pass").value;
+    if(!e||!p){ err.textContent="Enter email and password."; return; }
+    err.textContent="Signing in…";
+    try{ await authSignIn(e,p); err.textContent=""; }
+    catch(ex){ err.textContent = ex.message; }
+  });
+  document.getElementById("signup-btn").addEventListener("click", async function(){
+    err.textContent=""; const e=document.getElementById("auth-email").value.trim(), p=document.getElementById("auth-pass").value;
+    if(!e||!p){ err.textContent="Enter email and password."; return; }
+    err.textContent="Creating account…";
+    try{
+      const d = await authSignUp(e,p);
+      if(!d.access_token) err.textContent="Check your email to confirm, then sign in.";
+      else err.textContent="";
+    }
+    catch(ex){ err.textContent = ex.message; }
+  });
+}
 function dbRowToBook(row){
   return {
     id: row.id,
@@ -768,7 +851,7 @@ document.querySelectorAll("[data-go]").forEach(function(b){b.addEventListener("c
 function activate(name){
   document.querySelectorAll(".tab").forEach(function(b){b.classList.toggle("active", b.dataset.tab===name);});
   document.querySelectorAll(".panel").forEach(function(p){p.classList.toggle("active", p.id==="panel-"+name);});
-  if(name==="rate") loadRatePanel();
+  if(name=="rate"){ if(uid) loadRatePanel(); else showRateLocked(true); }
   if(name==="stats") renderStats();
   if(name==="recommend") maybeLoadRecs();
   if(name==="admin") maybeLoadAdmin();
@@ -842,7 +925,15 @@ function renderPast(){
 }
 
 /* --- Rate panel -------------------------------------------- */
+function showRateLocked(locked){
+  const lock=document.getElementById("rate-locked");
+  const grid=document.querySelector("#panel-rate .rate-grid");
+  if(lock) lock.style.display = locked ? "block":"none";
+  if(grid) grid.style.display = locked ? "none":"grid";
+}
 function loadRatePanel(){
+  if(!uid){ showRateLocked(true); return; }
+  showRateLocked(false);
   const cur = cb();
   setCover(document.getElementById("rate-cover"), cur);
   document.getElementById("rate-title").textContent = cur ? cur.title : "No current book";
@@ -884,6 +975,7 @@ document.getElementById("range").addEventListener("input", function(){
 document.getElementById("finished").addEventListener("change", function(e){ state.myFinished = e.target.checked; });
 
 async function doSave(forceFinished){
+  if(!uid) return;  // must be signed in to save
   const cur = cb(); if(!cur) return;
   const errEl = document.getElementById("err"); errEl.textContent="";
   const p = parseInt(document.getElementById("pages").value)||0;
@@ -1460,6 +1552,7 @@ async function deleteBook(key){
 /* ============================================================ */
 /* --- Boot --------------------------------------------------- */
 (async function boot(){
+  await restoreSession();   // sets uid + authToken if a session exists
   try{ BOOKS = await loadBookList(); }
   catch(e){ BOOKS = { currentBook:null, pastBooks:[] }; }
   if(!BOOKS.pastBooks) BOOKS.pastBooks=[];

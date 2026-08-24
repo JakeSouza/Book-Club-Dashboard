@@ -252,7 +252,7 @@
 <header class="site">
   <div class="crest"><span class="dot"></span> Est. 2025 <span class="dot"></span></div>
   <h1 class="club" id="club-name">Booked and Busy</h1>
-  <div class="tagline">A book clerb.</div>
+  <div class="tagline">Book Clerb.</div>
   <div id="auth-bar" class="auth-bar"></div>
 </header>
 
@@ -1064,12 +1064,6 @@ async function maybeLoadRecs(){
   }catch(e){ /* leave default club option */ }
   loadWishlist();
 }
-function setRecStatus(cls, msg){
-=======
-function maybeLoadRecs(){
-  // lazy: only fire network calls on explicit button click
-}
-function setRecStatus(cls, msg){
 function setRecStatus(cls, msg){
   const s = document.getElementById("rec-status");
   if(!s) return;

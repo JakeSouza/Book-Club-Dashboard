@@ -66,8 +66,13 @@
   .btn-ghost{background:var(--paper);color:var(--terracotta-deep);border:1px solid var(--line)}.btn-ghost:hover{background:var(--paper-3);transform:translateY(-1px)}
   .btn-sm{padding:7px 14px;font-size:13px;border-radius:7px}
 
-  .star{width:22px;height:22px;cursor:pointer;color:#d8d0b4;transition:color .1s,transform .1s}.star.on{color:var(--yellow-deep)}.star:hover{transform:scale(1.12)}
-  .stars.static .star{cursor:default}.stars.static .star:hover{transform:none}
+  .stars{display:inline-flex;gap:2px}
+  .star-wrap{position:relative;width:22px;height:22px;display:inline-block;cursor:pointer;transition:transform .1s}
+  .star-wrap:hover{transform:scale(1.1)}
+  .stars.static .star-wrap{cursor:default}.stars.static .star-wrap:hover{transform:none}
+  .star-bg,.star-fg{position:absolute;top:0;left:0;width:22px;height:22px;pointer-events:none}
+  .star-bg{color:#d8d0b4}
+  .star-fg{color:var(--yellow-deep);overflow:hidden}
 
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:26px}
   .past-card{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:16px;text-align:center;transition:transform .15s,box-shadow .15s;box-shadow:0 10px 24px -20px rgba(47,59,42,.3)}
@@ -212,7 +217,7 @@
   </section>
 
   <section class="panel" id="panel-rate">
-    <div id="rate-locked" class="rate-locked" style="display:none">Join the club above (name + passcode) to rate books and track your progress. Your ratings follow you across devices.</div>
+    <div id="rate-locked" class="rate-locked" style="display:none">Join the club above (just your name) to rate books and track your progress. Your ratings follow you across devices.</div>
     <div class="rate-grid">
       <div class="rate-side">
         <img id="rate-cover" alt="Book cover">
@@ -717,27 +722,53 @@ function daysBetween(a, b){
 }
 
 /* ============================================================ */
-/* --- Stars rendering --------------------------------------- */
-const STAR = '<svg class="star" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.9L22 10l-5.5 4.8L18.2 22 12 18.3 5.8 22l1.7-7.2L2 10l7.1-1.1z"/></svg>';
-function renderStarsStatic(el, value){
-  const v = Math.round(value*2)/2;
-  el.innerHTML = Array.from({length:5},function(_,i){
-    const fill = (i+1) <= Math.floor(v);
-    return STAR.replace('class="star"', 'class="star'+(fill?' on':'')+'"');
-  }).join("");
+/* --- Stars rendering (half-star aware) ---------------------- */
+const STAR = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.9L22 10l-5.5 4.8L18.2 22 12 18.3 5.8 22l1.7-7.2L2 10l7.1-1.1z"/></svg>';
+function starFillPercent(value, i){
+  const diff = value - (i-1);
+  if(diff>=1) return 100;
+  if(diff>=0.5) return 50;
+  return 0;
 }
-function renderStarsInput(el, value){
+function renderStarsStatic(el, value){
+  const v = Math.round((value||0)*2)/2;
   el.innerHTML="";
   for(let i=1;i<=5;i++){
     const wrap = document.createElement("span");
-    wrap.innerHTML = STAR.replace('class="star"', 'class="star'+(i<=value?' on':'')+'"');
-    const star = wrap.firstChild;
-    star.addEventListener("click", function(){ state.myRating = i; paintInput(); });
-    star.addEventListener("mouseenter", function(){ paintInput(i); });
-    el.appendChild(star);
+    wrap.className="star-wrap";
+    const pct = starFillPercent(v, i);
+    wrap.innerHTML =
+      '<span class="star-bg">'+STAR+'</span>'+
+      '<span class="star-fg" style="clip-path:inset(0 '+(100-pct)+'% 0 0)">'+STAR+'</span>';
+    el.appendChild(wrap);
+  }
+}
+function renderStarsInput(el, value){
+  el.innerHTML="";
+  function paintInput(hover){
+    const v = (hover!=null) ? hover : state.myRating;
+    el.querySelectorAll(".star-wrap").forEach(function(w,idx){
+      const pct = starFillPercent(v, idx+1);
+      w.querySelector(".star-fg").style.clipPath = "inset(0 "+(100-pct)+"% 0 0)";
+    });
+  }
+  for(let i=1;i<=5;i++){
+    const wrap = document.createElement("span");
+    wrap.className="star-wrap";
+    wrap.innerHTML =
+      '<span class="star-bg">'+STAR+'</span>'+
+      '<span class="star-fg"></span>';
+    function halfOf(e){
+      const rect = wrap.getBoundingClientRect();
+      const frac = rect.width ? (e.clientX-rect.left)/rect.width : 1;
+      return frac<=0.5 ? i-0.5 : i;
+    }
+    wrap.addEventListener("click", function(e){ state.myRating = halfOf(e); paintInput(); });
+    wrap.addEventListener("mousemove", function(e){ paintInput(halfOf(e)); });
+    el.appendChild(wrap);
   }
   el.addEventListener("mouseleave", function(){ paintInput(); });
-  function paintInput(hover){ el.querySelectorAll(".star").forEach(function(s,idx){ s.classList.toggle("on", (idx+1)<=(hover||state.myRating)); }); }
+  paintInput(value);
 }
 
 /* ============================================================ */
@@ -910,7 +941,7 @@ document.getElementById("save").addEventListener("click", function(){doSave();})
 
 
 /* --- Retroactive ratings (rate ANY current/past book) --- */
-function allBooks(){ const list=[]; if(BOOKS&&BOOKS.currentBook) list.push(BOOKS.currentBook); if(BOOKS&&BOOKS.pastBooks) list=list.concat(BOOKS.pastBooks); return list; }
+function allBooks(){ let list=[]; if(BOOKS&&BOOKS.currentBook) list.push(BOOKS.currentBook); if(BOOKS&&BOOKS.pastBooks) list=list.concat(BOOKS.pastBooks); return list; }
 function activeRateBook(){ if(state.activeRateBookId){ const b=allBooks().find(function(x){return x.id===state.activeRateBookId;}); if(b) return b; } return cb(); }
 function buildRateBookSelect(){ const sel=document.getElementById("rate-book-select"), wrap=document.getElementById("book-pick-wrap"); if(!sel||!wrap) return; const list=allBooks(); if(list.length<=1){ wrap.style.display="none"; return; } wrap.style.display="block"; sel.innerHTML=list.map(function(b){ const label=(b===cb()?"📖 ":"📚 ")+b.title+(b.author?(" — "+b.author):""); return '<option value="'+esc(b.id)+'"'+(b.id===state.activeRateBookId?" selected":"")+'>'+esc(label)+'</option>'; }).join(""); }
 function loadRatePanel(bookId){ if(bookId) state.activeRateBookId=bookId; if(!uid){ showRateLocked(true); return; } showRateLocked(false); const cur=activeRateBook(); if(!cur) return; setCover(document.getElementById("rate-cover"), cur); document.getElementById("rate-title").textContent=cur.title; document.getElementById("rate-author").textContent="by "+cur.author; document.getElementById("pages-of").textContent="/ "+(cur.totalPages||"?")+" pages"; const range=document.getElementById("range"); range.max=cur.totalPages||100; buildRateBookSelect(); getMyRecord(cur.id).then(function(my){ return getMyMember().then(function(member){ state.myRating=my?(my.rating||0):0; state.myProgress=my?(my.progress||0):0; state.myFinished=my?!!my.finished:false; state.myReview=my?(my.review||""):""; state.existingStartedAt=my?(my.started_at||null):null; state.myName=member?(member.name||""):""; document.getElementById("my-name").value=state.myName||memberName(); renderStarsInput(document.getElementById("rate-stars"), state.myRating); document.getElementById("pages").value=state.myProgress; document.getElementById("range").value=state.myProgress; document.getElementById("finished").checked=state.myFinished; document.getElementById("review").value=state.myReview; updatePct(); }); }).catch(function(){ renderStarsInput(document.getElementById("rate-stars"), 0); document.getElementById("my-name").value=memberName(); }); }
@@ -1296,8 +1327,7 @@ function tryUnlock(){
   const err = document.getElementById("gate-err");
   if(val === CONFIG.adminPasscode){
     adminUnlocked = true;
-    showAdminContent();
-    renderAdminTables();
+    maybeLoadAdmin();
   } else {
     err.textContent = "Incorrect passcode.";
   }

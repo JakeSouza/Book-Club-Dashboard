@@ -27,7 +27,7 @@ create table if not exists book_club (
   id          bigint generated always as identity primary key,
   user_id     uuid not null references members(user_id) on delete cascade,
   book_id     text not null references books(id)      on delete cascade,
-  rating      int check (rating is null or rating between 1 and 5),
+  rating      numeric(2,1) check (rating is null or (rating between 1 and 5 and rating*2 = floor(rating*2))),
   progress    int check (progress is null or progress between 0 and 10000),
   review      text,
   finished    boolean not null default false,
@@ -35,6 +35,13 @@ create table if not exists book_club (
   updated_at  timestamptz not null default now(),
   unique (user_id, book_id)
 );
+
+-- Existing installs: ratings were integer-only (1–5) — widen to allow
+-- half-star values (1, 1.5, 2 ... 5) for the new half-star picker.
+alter table book_club drop constraint if exists book_club_rating_check;
+alter table book_club alter column rating type numeric(2,1) using rating::numeric(2,1);
+alter table book_club add constraint book_club_rating_check
+  check (rating is null or (rating between 1 and 5 and rating*2 = floor(rating*2)));
 
 create table if not exists wishlist (
   id          bigint generated always as identity primary key,
@@ -46,6 +53,16 @@ create table if not exists wishlist (
   added_at    timestamptz not null default now()
 );
 
+-- Meetings: the Admin tab's "next meeting" date/time + location. Only ever
+-- holds 0 or 1 row in practice — saving clears the table then inserts one.
+create table if not exists meetings (
+  id          bigint generated always as identity primary key,
+  book_id     text references books(id) on delete set null,
+  meeting_at  timestamptz not null,
+  location    text,
+  created_at  timestamptz not null default now()
+);
+
 -- Existing installs: drop the old FK to auth.users so name-derived ids
 -- (which are not real Supabase Auth users) can be inserted.
 alter table members drop constraint if exists members_user_id_fkey;
@@ -54,6 +71,7 @@ alter table books     enable row level security;
 alter table members   enable row level security;
 alter table book_club enable row level security;
 alter table wishlist  enable row level security;
+alter table meetings  enable row level security;
 
 -- policies: drop-if-exists first so re-running doesn't error on duplicates
 -- Reads → public. Writes → open to anyone with the (public) anon key —
@@ -80,3 +98,8 @@ drop policy if exists "wishlist delete"  on wishlist;
 create policy "wishlist read"   on wishlist for select using (true);
 create policy "wishlist write"  on wishlist for insert with check (true);
 create policy "wishlist delete" on wishlist for delete using (true);
+
+drop policy if exists "meetings read"  on meetings;
+drop policy if exists "meetings write" on meetings;
+create policy "meetings read"  on meetings for select using (true);
+create policy "meetings write" on meetings for all    using (true) with check (true);

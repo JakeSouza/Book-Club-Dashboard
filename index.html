@@ -3,295 +3,207 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500&family=Caveat:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <title>Booked and Busy — Book Club</title>
 <style>
   :root{
-    --paper:#f4f1e8;
-    --paper-2:#ebe5d6;
-    --ink:#2d3a2e;
-    --ink-soft:#5e6b58;
-    --plum:#5d7a5d;
-    --plum-dark:#3f5942;
-    --moss:#5d7a5d;
-    --moss-dark:#3f5942;
-    --gold:#b8975a;
-    --line:#d8cfb6;
-    --serif:Georgia,"Times New Roman",serif;
-    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --bg:#f5f1e4;--bg-2:#ece4cd;--bg-glow:rgba(124,139,111,.16);
+    --paper:#ffffff;--paper-2:#fbf8ee;--paper-3:#eef1e2;
+    --ink:#2f3b2a;--ink-soft:#707c62;
+    --cream:#2f3b2a;--cream-soft:#707c62;
+    --line:#ddd5bd;--line-blue:rgba(47,59,42,.14);
+    --sage:#7c8b6f;--sage-deep:#586652;
+    --terracotta:#be6e4d;--terracotta-deep:#94502f;
+    --blue:#586652;--blue-bright:#7c8b6f;
+    --red:#a4453a;--green:#6f8f52;--green-dark:#4f6a39;
+    --yellow:#c9a227;--yellow-deep:#a3801d;
+    --serif:'Fraunces',Georgia,"Times New Roman",serif;
+    --hand:'Caveat',cursive;
+    --sans:'Inter',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   }
-  /* faint linen / paper texture for a cottagecore feel */
-  body::before{
-    content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.5;
-    background-image:
-      repeating-linear-gradient(0deg, rgba(61,89,66,.018) 0 1px, transparent 1px 3px),
-      repeating-linear-gradient(90deg, rgba(61,89,66,.018) 0 1px, transparent 1px 3px),
-      radial-gradient(900px 500px at 50% -8%, #fbf8f0, transparent 60%);
-  }
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.7;background:repeating-linear-gradient(90deg,rgba(0,0,0,.012) 0 2px,transparent 2px 6px),radial-gradient(1000px 480px at 50% -10%,var(--bg-glow),transparent 62%);}
   body>*{position:relative;z-index:1}
   *{box-sizing:border-box}
   html,body{margin:0;padding:0}
-  body{
-    font-family:var(--sans);
-    color:var(--ink);
-    background:
-      radial-gradient(1200px 600px at 50% -10%, #fbf8f0, transparent 60%),
-      var(--paper);
-    min-height:100vh;
-    -webkit-font-smoothing:antialiased;
-  }
-  a{color:var(--moss)}
+  body{font-family:var(--sans);color:var(--ink);background:var(--bg);min-height:100vh;-webkit-font-smoothing:antialiased;}
+  a{color:var(--terracotta-deep)}
 
-  header.site{
-    text-align:center;
-    padding:38px 20px 26px;
-    border-bottom:1px solid var(--line);
-    background:
-      linear-gradient(180deg, #fbf8ef, transparent),
-      radial-gradient(700px 160px at 50% 0, rgba(184,151,90,.10), transparent 70%);
-    position:relative;
-  }
-  /* botanical flourish above the club name */
-  header.site::before{
-    content:"";display:block;height:26px;margin-bottom:6px;
-    background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 20' fill='none' stroke='%235d7a5d' stroke-width='1' stroke-linecap='round'><path d='M60 18 C56 12 50 10 44 11 M60 18 C64 12 70 10 76 11 M60 18 V4 M56 6 C54 9 53 11 52 12 M64 6 C66 9 67 11 68 12 M50 11 C46 9 43 9 40 11 M70 11 C74 9 77 9 80 11'/><circle cx='60' cy='4' r='1.6' fill='%23b8975a' stroke='none'/><circle cx='44' cy='11' r='1.2' fill='%23b8975a' stroke='none'/><circle cx='76' cy='11' r='1.2' fill='%23b8975a' stroke='none'/></svg>") center/contain no-repeat;
-    opacity:.85;
-  }
-  .crest{
-    display:inline-flex;align-items:center;gap:10px;
-    font-family:var(--serif);color:var(--moss);
-    letter-spacing:.18em;font-size:12px;text-transform:uppercase;font-weight:bold;
-  }
-  .crest .dot{width:6px;height:6px;border-radius:50%;background:var(--gold)}
-  h1.club{
-    font-family:var(--serif);
-    font-size:clamp(30px,5vw,52px);
-    margin:8px 0 4px;
-    color:var(--ink);
-    letter-spacing:.5px;
-    text-shadow:0 1px 0 rgba(255,255,255,.5);
-  }
-  .tagline{color:var(--ink-soft);font-style:italic;font-family:var(--serif);font-size:15px}
+  header.site{text-align:center;padding:40px 20px 20px;color:var(--ink);position:relative;}
+  .crest{display:inline-flex;align-items:center;gap:10px;font-family:var(--sans);color:var(--ink-soft);letter-spacing:.22em;font-size:11px;text-transform:uppercase;font-weight:600;}
+  .crest .dot{width:4px;height:4px;border-radius:50%;background:var(--terracotta)}
+  .club-name{font-family:var(--serif);font-weight:600;font-size:22px;color:var(--ink);margin-top:6px}
+  .tagline{color:var(--terracotta-deep);font-family:var(--hand);font-size:19px;letter-spacing:.01em;margin-top:2px;transform:rotate(-1.5deg);display:inline-block}
 
-  nav.tabs{
-    max-width:980px;margin:0 auto;padding:18px 20px 0;
-    display:flex;gap:8px;justify-content:center;flex-wrap:wrap;
-  }
-  .tab{
-    appearance:none;border:1px solid var(--line);background:var(--paper-2);
-    padding:10px 18px;border-radius:999px;cursor:pointer;
-    font-size:14px;color:var(--ink-soft);font-weight:600;
-    transition:all .15s; font-family:var(--sans);
-  }
-  .tab:hover{border-color:var(--gold);color:var(--ink)}
-  .tab.active{
-    background:var(--moss);border-color:var(--moss-dark);color:#fbf8ef;
-    box-shadow:0 6px 16px -8px rgba(63,89,66,.7);
-  }
-  .tab.admin-tab{border-color:var(--gold);color:var(--gold)}
-  .tab.admin-tab.active{background:var(--gold);border-color:#a07f43;color:#fff}
+  nav.tabs{max-width:980px;margin:6px auto 0;padding:18px 20px 0;display:flex;gap:22px;justify-content:center;flex-wrap:wrap;border-bottom:1px solid var(--line);}
+  .tab{appearance:none;border:none;background:transparent;padding:6px 2px 14px;cursor:pointer;font-size:14px;color:var(--ink-soft);font-weight:500;transition:color .15s;font-family:var(--sans);border-bottom:2px solid transparent;margin-bottom:-1px;}
+  .tab:hover{color:var(--ink)}
+  .tab.active{color:var(--ink);border-color:var(--terracotta);font-weight:600;}
+  .tab.admin-tab{color:#a97a68}
+  .tab.admin-tab.active{color:var(--red);border-color:var(--red);}
 
-  main{max-width:980px;margin:0 auto;padding:26px 20px 80px}
-  .panel{display:none;animation:fade .25s ease}
-  .panel.active{display:block}
+  main{max-width:980px;margin:0 auto;padding:28px 20px 80px}
+  .panel{display:none;animation:fade .25s ease}.panel.active{display:block}
   @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 
-  .hero{text-align:center;padding:10px 0 0}
-  .hero .cover-wrap{display:flex;justify-content:center}
-  .book-cover{
-    width:230px;max-width:70vw;aspect-ratio:2/3;border-radius:8px;
-    box-shadow:0 26px 44px -18px rgba(40,30,20,.55), 0 2px 6px rgba(0,0,0,.12);
-    background:var(--paper-2);object-fit:cover;
-    transition:transform .25s, box-shadow .25s;
-    border:1px solid rgba(0,0,0,.06);
-  }
-  .book-cover:hover{transform:translateY(-4px);box-shadow:0 30px 50px -18px rgba(40,30,20,.6)}
-  .hero h2{font-family:var(--serif);font-size:clamp(24px,3.4vw,34px);margin:22px 0 4px}
-  .hero .author{color:var(--ink-soft);font-style:italic;font-family:var(--serif);font-size:17px;margin-bottom:18px}
-  .rating-row{display:inline-flex;align-items:center;gap:10px;background:var(--paper-2);border:1px solid var(--line);
-    padding:8px 16px;border-radius:999px;box-shadow:0 6px 16px -10px rgba(0,0,0,.18)}
+  .current-card{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:22px;display:flex;gap:24px;align-items:center;box-shadow:0 12px 30px -20px rgba(47,59,42,.3);position:relative}
+  .current-card .cover-wrap{flex-shrink:0}
+  .current-card .current-info{text-align:left;min-width:0}
+  .book-cover{width:120px;max-width:32vw;aspect-ratio:2/3;border-radius:5px;box-shadow:0 14px 26px -14px rgba(47,59,42,.4);background:var(--paper-3);object-fit:cover;transition:transform .2s;border:1px solid var(--line);}
+  .current-card:hover .book-cover{transform:translateY(-2px) rotate(-.6deg)}
+  .current-info h2{font-family:var(--serif);font-weight:600;font-size:clamp(20px,2.6vw,26px);margin:0 0 3px;color:var(--ink)}
+  .current-info .author{color:var(--ink-soft);font-style:italic;font-family:var(--serif);font-size:15px;margin-bottom:12px}
+  .rating-row{display:inline-flex;align-items:center;gap:8px;background:var(--paper-2);border:1px solid var(--line);padding:5px 12px;border-radius:999px}
   .rating-row .stars{display:inline-flex;gap:2px}
   .rating-row .num{font-weight:700;color:var(--ink)}
   .rating-row .count{color:var(--ink-soft);font-size:13px}
-  .status-pill{margin-top:14px;display:inline-block;background:var(--paper-2);border:1px solid var(--line);
-    padding:6px 14px;border-radius:999px;font-size:13px;color:var(--ink-soft)}
-  .cta-rate{margin-top:22px}
-  .btn{
-    appearance:none;cursor:pointer;border:none;font-family:var(--sans);font-weight:700;
-    padding:12px 24px;border-radius:12px;font-size:15px;transition:transform .12s, box-shadow .15s;
-  }
-  .btn-primary{background:var(--moss);color:#fbf8ef}
-  .btn-primary:hover{background:var(--moss-dark);transform:translateY(-1px);box-shadow:0 10px 20px -10px rgba(63,89,66,.7)}
-  .btn-ghost{background:var(--paper-2);color:var(--moss);border:1px solid var(--moss)}
-  .btn-ghost:hover{background:#e3dcc8}
-  .btn-sm{padding:7px 14px;font-size:13px;border-radius:9px}
+  .status-pill{margin:10px 0 0;display:inline-block;background:var(--paper-3);border:1px solid var(--line);padding:5px 12px;border-radius:999px;font-size:12.5px;color:var(--ink-soft)}
+  .cta-rate{margin-top:16px}
+  @media(max-width:560px){.current-card{flex-direction:column;text-align:center}.current-card .current-info{text-align:center}}
+  .btn{appearance:none;cursor:pointer;border:none;font-family:var(--sans);font-weight:600;padding:12px 24px;border-radius:9px;font-size:15px;transition:transform .12s,box-shadow .15s;}
+  .btn-primary{background:var(--green);color:#fff}.btn-primary:hover{background:var(--green-dark);transform:translateY(-1px);box-shadow:0 10px 22px -10px rgba(111,143,82,.55)}
+  .btn-ghost{background:var(--paper);color:var(--terracotta-deep);border:1px solid var(--line)}.btn-ghost:hover{background:var(--paper-3);transform:translateY(-1px)}
+  .btn-sm{padding:7px 14px;font-size:13px;border-radius:7px}
 
-  .star{width:22px;height:22px;cursor:pointer;color:#cab98f;transition:color .1s, transform .1s}
-  .star.on{color:var(--gold)}
-  .star:hover{transform:scale(1.12)}
-  .stars.static .star{cursor:default}
-  .stars.static .star:hover{transform:none}
+  .star{width:22px;height:22px;cursor:pointer;color:#d8d0b4;transition:color .1s,transform .1s}.star.on{color:var(--yellow-deep)}.star:hover{transform:scale(1.12)}
+  .stars.static .star{cursor:default}.stars.static .star:hover{transform:none}
 
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:26px}
-  .past-card{background:var(--paper-2);border:1px solid var(--line);border-radius:14px;padding:16px;text-align:center;
-    transition:transform .15s, box-shadow .15s}
-  .past-card:hover{transform:translateY(-4px);box-shadow:0 16px 28px -16px rgba(63,89,66,.28);border-color:var(--moss)}
-  .past-card img{width:120px;aspect-ratio:2/3;margin:0 auto 12px;object-fit:cover;border-radius:4px;
-    box-shadow:0 10px 18px -10px rgba(0,0,0,.5)}
-  .past-card h3{font-family:var(--serif);font-size:17px;margin:6px 0 2px;line-height:1.25}
+  .past-card{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:16px;text-align:center;transition:transform .15s,box-shadow .15s;box-shadow:0 10px 24px -20px rgba(47,59,42,.3)}
+  .past-card:hover{transform:translateY(-4px);box-shadow:0 18px 32px -18px rgba(47,59,42,.3);border-color:var(--terracotta)}
+  .past-card img{width:120px;aspect-ratio:2/3;margin:0 auto 12px;object-fit:cover;border-radius:5px;box-shadow:0 10px 18px -10px rgba(47,59,42,.3);border:1px solid var(--line)}
+  .past-card h3{font-family:var(--serif);font-weight:600;font-size:17px;margin:6px 0 2px;line-height:1.25;color:var(--ink)}
   .past-card .author{font-size:12.5px;color:var(--ink-soft);font-style:italic;font-family:var(--serif);margin-bottom:8px}
-  .past-card .grp{display:inline-flex;align-items:center;gap:6px}
-  .past-card .grp .num{font-weight:700;font-size:13px}
+  .past-card .grp{display:inline-flex;align-items:center;gap:6px}.past-card .grp .num{font-weight:700;font-size:13px;color:var(--ink)}
+  .past-card .rate-this-btn{background:var(--terracotta);color:#fff;border:none}.past-card .rate-this-btn:hover{background:var(--terracotta-deep)}
 
-  .section-title{font-family:var(--serif);font-size:24px;margin:0 0 18px;display:flex;align-items:center;gap:12px}
-  .section-title::after{content:"";flex:1;height:1px;background:var(--line)}
+  .section-title{font-family:var(--serif);font-weight:600;font-size:23px;margin:0 0 18px;display:flex;align-items:center;gap:12px;color:var(--ink)}
+  .section-title::after{content:"";flex:1;height:1px;background:var(--line);border-radius:2px}
   .empty{color:var(--ink-soft);font-style:italic;text-align:center;padding:40px 0;font-family:var(--serif)}
 
-  .rate-grid{display:grid;grid-template-columns:1fr;gap:28px}
-  @media(min-width:760px){.rate-grid{grid-template-columns:240px 1fr}}
-  .rate-card{background:var(--paper-2);border:1px solid var(--line);border-radius:16px;padding:26px;box-shadow:0 8px 24px -16px rgba(63,89,66,.2)}
-  .rate-card h2{font-family:var(--serif);margin:0 0 6px}
-  .rate-card .author{color:var(--ink-soft);font-family:var(--serif);font-style:italic;margin:0 0 22px}
-  .field{margin-bottom:24px}
-  .field label{display:block;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-soft);margin-bottom:10px}
+  .rate-grid{display:grid;grid-template-columns:1fr;gap:28px}@media(min-width:760px){.rate-grid{grid-template-columns:240px 1fr}}
+  .rate-card{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:26px;box-shadow:0 12px 30px -20px rgba(47,59,42,.3)}
+  .rate-card h2{font-family:var(--serif);font-weight:600;margin:0 0 6px;color:var(--ink)}.rate-card .author{color:var(--ink-soft);font-family:var(--serif);font-style:italic;margin:0 0 22px}
+  .field{margin-bottom:24px}.field label{display:block;font-size:12.5px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-soft);margin-bottom:10px}
   .progress-controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-  input[type=number],input[type=text],input[type=password]{padding:9px 12px;border:1px solid var(--line);border-radius:9px;font-size:15px;font-family:var(--sans);background:#fbfaf3}
-  input[type=number]{width:84px}
-  input[type=text],input[type=password]{width:100%}
-  input[type=range]{flex:1;min-width:160px;accent-color:var(--plum)}
-  .pct{font-weight:700;color:var(--plum);min-width:46px;text-align:right}
-  .toggle-fin{display:inline-flex;align-items:center;gap:10px;cursor:pointer;user-select:none}
-  .toggle-fin input{width:18px;height:18px;accent-color:var(--plum)}
-  .saved{color:#2f7d52;font-weight:600;font-size:13px;opacity:0;transition:opacity .2s}
-  .saved.show{opacity:1}
-  .err{color:#b23b2e;font-size:13px;margin-top:8px}
-  .rate-side{text-align:center}
-  .rate-side img{width:200px;max-width:60vw;aspect-ratio:2/3;border-radius:6px;box-shadow:0 18px 30px -16px rgba(0,0,0,.5);object-fit:cover}
-  textarea{width:100%;padding:9px 12px;border:1px solid var(--line);border-radius:9px;font-size:15px;font-family:var(--sans);background:#fbfaf3;resize:vertical}
-  .reviews{margin-top:26px;text-align:left;display:grid;gap:12px}
-  .reviews:empty{display:none}
-  .reviews-title{font-family:var(--serif);font-size:18px;margin:0 0 4px}
+  input[type=number],input[type=text],input[type=password],input[type=email],input[type=datetime-local]{padding:9px 12px;border:1px solid var(--line);border-radius:8px;font-size:15px;font-family:var(--sans);background:var(--paper-2);color:var(--ink)}
+  input:focus,textarea:focus,select:focus{outline:none;border-color:var(--terracotta);box-shadow:0 0 0 3px rgba(190,110,77,.16)}
+  input[type=number]{width:84px}input[type=text],input[type=password]{width:100%}input[type=range]{flex:1;min-width:160px;accent-color:var(--terracotta)}
+  .pct{font-weight:700;color:var(--terracotta-deep);min-width:46px;text-align:right}
+  .toggle-fin{display:inline-flex;align-items:center;gap:10px;cursor:pointer;user-select:none}.toggle-fin input{width:18px;height:18px;accent-color:var(--green)}
+  .saved{color:var(--green-dark);font-weight:600;font-size:13px;opacity:0;transition:opacity .2s}.saved.show{opacity:1}
+  .err{color:var(--red);font-size:13px;margin-top:8px}
+  .rate-side{text-align:center}.rate-side img{width:200px;max-width:60vw;aspect-ratio:2/3;border-radius:5px;box-shadow:0 18px 30px -16px rgba(47,59,42,.3);object-fit:cover;border:1px solid var(--line)}
+  textarea{width:100%;padding:9px 12px;border:1px solid var(--line);border-radius:8px;font-size:15px;font-family:var(--sans);background:var(--paper-2);resize:vertical;color:var(--ink)}
+  .reviews{margin-top:26px;text-align:left;display:grid;gap:12px}.reviews:empty{display:none}
+  .reviews-title{font-family:var(--serif);font-weight:600;font-size:18px;margin:0 0 4px;color:var(--ink)}
   .review-item{background:var(--paper-2);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
-  .review-item .who{font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);margin-bottom:6px}
-  .review-item .what{font-family:var(--serif);font-size:15px;line-height:1.55;white-space:pre-wrap}
+  .review-item .who{font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--terracotta-deep);margin-bottom:6px}
+  .review-item .what{font-family:var(--serif);font-size:15px;line-height:1.55;white-space:pre-wrap;color:var(--ink)}
 
-  /* Suggestions */
-  .rec-card{background:var(--paper-2);border:1px solid var(--line);border-radius:14px;padding:16px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px;transition:transform .15s, box-shadow .15s}
-  .rec-card:hover{transform:translateY(-4px);box-shadow:0 16px 28px -16px rgba(63,89,66,.28);border-color:var(--moss)}
-  .rec-card img{width:120px;aspect-ratio:2/3;object-fit:cover;border-radius:6px;background:var(--paper);box-shadow:0 10px 18px -10px rgba(0,0,0,.45)}
-  .rec-card .rec-cover-fallback{width:120px;aspect-ratio:2/3;border-radius:6px;background:var(--paper);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;padding:10px;text-align:center;font-family:var(--serif);font-size:12px;color:var(--ink-soft)}
-  .rec-card h3{font-family:var(--serif);font-size:15px;margin:2px 0 0;line-height:1.25}
+  .rec-card{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:16px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px;transition:transform .15s,box-shadow .15s;box-shadow:0 10px 24px -20px rgba(47,59,42,.3)}
+  .rec-card:hover{transform:translateY(-4px);box-shadow:0 18px 32px -18px rgba(47,59,42,.3);border-color:var(--terracotta)}
+  .rec-card img{width:120px;aspect-ratio:2/3;object-fit:cover;border-radius:5px;background:var(--paper-3);box-shadow:0 10px 18px -10px rgba(47,59,42,.28);border:1px solid var(--line)}
+  .rec-card .rec-cover-fallback{width:120px;aspect-ratio:2/3;border-radius:5px;background:var(--paper-3);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;padding:10px;text-align:center;font-family:var(--serif);font-size:12px;color:var(--ink-soft)}
+  .rec-card h3{font-family:var(--serif);font-weight:600;font-size:15px;margin:2px 0 0;line-height:1.25;color:var(--ink)}
   .rec-card .author{font-size:12px;color:var(--ink-soft);font-style:italic;font-family:var(--serif)}
-  .rec-card .why{font-size:11.5px;color:var(--moss-dark);background:rgba(93,122,93,.10);border:1px solid rgba(93,122,93,.18);border-radius:999px;padding:3px 10px;font-style:italic;font-family:var(--serif)}
-  .rec-card .rec-add{margin-top:4px}
-  .rec-card .rec-add.done{pointer-events:none;opacity:.6}
-  .rec-card .rec-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+  .rec-card .why{font-family:var(--hand);font-size:14px;color:var(--sage-deep);background:rgba(124,139,111,.14);border:1px solid rgba(124,139,111,.28);border-radius:999px;padding:2px 12px;}
+  .rec-card .rec-add.done{pointer-events:none;opacity:.6}.rec-card .rec-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
 
-  /* Wishlist */
-  .wl-card{background:var(--paper-2);border:1px solid var(--line);border-radius:14px;padding:16px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px}
-  .wl-card img{width:120px;aspect-ratio:2/3;object-fit:cover;border-radius:6px;background:var(--paper);box-shadow:0 10px 18px -10px rgba(0,0,0,.45)}
-  .wl-card .wl-cover-fallback{width:120px;aspect-ratio:2/3;border-radius:6px;background:var(--paper);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;padding:10px;text-align:center;font-family:var(--serif);font-size:12px;color:var(--ink-soft)}
-  .wl-card h3{font-family:var(--serif);font-size:15px;margin:2px 0 0;line-height:1.25}
+  .wl-card{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:16px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px;box-shadow:0 10px 24px -20px rgba(47,59,42,.3)}
+  .wl-card img{width:120px;aspect-ratio:2/3;object-fit:cover;border-radius:5px;background:var(--paper-3);box-shadow:0 10px 18px -10px rgba(47,59,42,.28);border:1px solid var(--line)}
+  .wl-card .wl-cover-fallback{width:120px;aspect-ratio:2/3;border-radius:5px;background:var(--paper-3);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;padding:10px;text-align:center;font-family:var(--serif);font-size:12px;color:var(--ink-soft)}
+  .wl-card h3{font-family:var(--serif);font-weight:600;font-size:15px;margin:2px 0 0;line-height:1.25;color:var(--ink)}
   .wl-card .author{font-size:12px;color:var(--ink-soft);font-style:italic;font-family:var(--serif)}
-  .wl-card .nominated{font-size:11px;color:var(--ink-soft);font-family:var(--serif)}
-  .wl-card .wl-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:4px}
+  .wl-card .nominated{font-size:11px;color:var(--ink-soft);font-family:var(--hand);font-size:14px}.wl-card .wl-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:4px}
 
-  /* Stats */
   .stats-note{color:var(--ink-soft);font-size:13px;font-family:var(--serif);font-style:italic;margin:-8px 0 18px}
   .stats-wrap{overflow-x:auto}
-  .stats-table{width:100%;border-collapse:collapse;background:var(--paper-2);border:1px solid var(--line);border-radius:14px;overflow:hidden;font-size:14px}
+  .stats-table{width:100%;border-collapse:collapse;background:var(--paper);border:1px solid var(--line);border-radius:12px;overflow:hidden;font-size:14px;box-shadow:0 12px 30px -20px rgba(47,59,42,.3)}
   .stats-table th,.stats-table td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
-  .stats-table thead th{background:var(--paper-2);font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft)}
-  .stats-table tbody tr:last-child td{border-bottom:none}
-  .stats-table .name{font-family:var(--serif);font-weight:600}
-  .stats-table tr.you{background:#fbf5e6}
-  .stats-table .num{font-weight:700;color:var(--moss-dark)}
-  .star-s{color:var(--gold)}
-  .avatar{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;
-    background:var(--moss);color:#fbf8ef;font-weight:700;font-size:13px;margin-right:10px;vertical-align:middle}
-  .star-s{color:var(--gold)}
+  .stats-table thead th{background:var(--paper-3);font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft)}
+  .stats-table tbody tr:last-child td{border-bottom:none}.stats-table .name{font-family:var(--serif);font-weight:600;color:var(--ink)}
+  .stats-table tr.you{background:rgba(190,110,77,.08)}.stats-table .num{font-weight:700;color:var(--green-dark)}
+  .star-s{color:var(--yellow-deep)}.avatar{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:var(--sage);color:#fff;font-weight:700;font-size:13px;margin-right:10px;vertical-align:middle}
 
-  /* Admin */
-  .gate{max-width:360px;margin:30px auto;text-align:center;background:var(--paper-2);border:1px solid var(--line);border-radius:16px;padding:32px;box-shadow:0 8px 24px -16px rgba(63,89,66,.2)}
-  .gate h2{font-family:var(--serif);margin:0 0 8px}
-  .gate p{color:var(--ink-soft);font-size:14px;margin:0 0 20px;font-family:var(--serif);font-style:italic}
+  .gate{max-width:360px;margin:30px auto;text-align:center;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:32px;box-shadow:0 14px 34px -20px rgba(47,59,42,.35)}
+  .gate h2{font-family:var(--serif);font-weight:600;margin:0 0 8px;color:var(--ink)}.gate p{color:var(--ink-soft);font-size:14px;margin:0 0 20px;font-family:var(--serif);font-style:italic}
   .admin-bar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap}
   .admin-bar .hint{font-size:12.5px;color:var(--ink-soft);font-style:italic;font-family:var(--serif)}
-  .admin-card{background:var(--paper-2);border:1px solid var(--line);border-radius:16px;padding:22px;margin-bottom:18px;box-shadow:0 6px 20px -16px rgba(63,89,66,.2)}
-  .admin-card h3{font-family:var(--serif);margin:0 0 14px;display:flex;align-items:center;gap:8px}
-  .admin-card .tag{font-size:10px;text-transform:uppercase;letter-spacing:.08em;background:var(--moss);color:#fbf8ef;padding:2px 8px;border-radius:999px;font-weight:700}
-  .admin-card .tag.past{background:var(--ink-soft)}
+  .admin-card{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:22px;margin-bottom:18px;box-shadow:0 10px 26px -20px rgba(47,59,42,.3)}
+  .admin-card h3{font-family:var(--serif);font-weight:600;margin:0 0 14px;display:flex;align-items:center;gap:8px;color:var(--ink)}
+  .admin-card .tag{font-size:10px;text-transform:uppercase;letter-spacing:.08em;background:var(--green);color:#fff;padding:2px 8px;border-radius:999px;font-weight:700}.admin-card .tag.past{background:var(--sage-deep)}
   .books-table{width:100%;border-collapse:collapse;font-size:13.5px}
   .books-table th,.books-table td{padding:9px 8px;text-align:left;border-bottom:1px solid var(--line);vertical-align:middle}
   .books-table th{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft)}
-  .books-table td .title{font-family:var(--serif);font-weight:600}
-  .books-table td .author{color:var(--ink-soft);font-size:12px;font-style:italic;font-family:var(--serif)}
-  .books-table td .isbn{color:var(--ink-soft);font-size:12px}
-  .books-table .mini{width:38px;aspect-ratio:2/3;object-fit:cover;border-radius:3px;box-shadow:0 4px 8px -4px rgba(0,0,0,.5);background:var(--paper-2)}
+  .books-table td .title{font-family:var(--serif);font-weight:600;color:var(--ink)}.books-table td .author{color:var(--ink-soft);font-size:12px;font-style:italic;font-family:var(--serif)}
+  .books-table td .isbn{color:var(--ink-soft);font-size:12px}.books-table .mini{width:38px;aspect-ratio:2/3;object-fit:cover;border-radius:4px;box-shadow:0 4px 8px -4px rgba(47,59,42,.3);background:var(--paper-3);border:1px solid var(--line)}
   .row-btns{display:flex;gap:6px;justify-content:flex-end;white-space:nowrap}
-  .icon-btn{cursor:pointer;border:1px solid var(--line);background:var(--paper-2);border-radius:8px;padding:6px 9px;font-size:12px;color:var(--ink-soft);transition:all .12s}
-  .icon-btn:hover{border-color:var(--moss);color:var(--moss)}
-  .icon-btn.danger:hover{border-color:#b23b2e;color:#b23b2e}
-  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-  .form-grid .full{grid-column:1/-1}
-  .form-grid .field{margin-bottom:0}
-  .form-grid .field label{font-size:11px}
+  .icon-btn{cursor:pointer;border:1px solid var(--line);background:var(--paper-2);border-radius:7px;padding:6px 9px;font-size:12px;color:var(--ink-soft);transition:all .12s}
+  .icon-btn:hover{border-color:var(--terracotta);color:var(--terracotta-deep)}.icon-btn.danger:hover{border-color:var(--red);color:var(--red)}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.form-grid .full{grid-column:1/-1}.form-grid .field{margin-bottom:0}.form-grid .field label{font-size:11px}
   .form-row-actions{display:flex;gap:10px;margin-top:14px;align-items:center;flex-wrap:wrap}
-  .lookup-status{font-size:12.5px;color:var(--ink-soft);min-height:16px}
-  .lookup-status.ok{color:#2f7d52}
-  .lookup-status.err{color:#b23b2e}
+  .lookup-status{font-size:12.5px;color:var(--ink-soft);min-height:16px}.lookup-status.ok{color:var(--green-dark)}.lookup-status.err{color:var(--red)}
 
-  .auth-bar{margin-top:14px;display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;font-size:14px}
-  .auth-bar input[type=email],.auth-bar input[type=password]{width:auto;min-width:150px;max-width:60vw}
-  .auth-bar .who{color:var(--moss-dark);font-weight:700;font-family:var(--serif)}
-  .auth-bar .auth-err{color:#b23b2e;font-size:12px;min-height:14px;width:100%;text-align:center;margin-top:2px}
-  .rate-locked{text-align:center;color:var(--ink-soft);font-style:italic;font-family:var(--serif);padding:40px 20px;background:var(--paper-2);border:1px solid var(--line);border-radius:16px}
-  .meeting-box{margin-top:18px;background:var(--paper-2);border:1px solid var(--line);border-radius:14px;padding:18px 22px;display:none;text-align:center}
-  .meeting-box h3{font-family:var(--serif);font-size:15px;margin:0 0 4px;color:var(--moss-dark);text-transform:uppercase;letter-spacing:.06em}
-  .meeting-box .meeting-countdown{font-family:var(--serif);font-size:clamp(22px,3.4vw,32px);font-weight:700;color:var(--moss);margin:2px 0 4px}
-  .meeting-box .meeting-when{font-size:14px;color:var(--ink-soft);font-family:var(--serif)}
-  .meeting-box .meeting-loc{font-size:14px;color:var(--ink-soft);font-family:var(--serif);margin-top:2px}
-  .rate-book-sel{padding:9px 12px;border:1px solid var(--line);border-radius:9px;font-size:15px;font-family:var(--sans);background:#fbfaf3;width:100%;margin-bottom:4px}
-  footer{text-align:center;color:var(--ink-soft);font-size:12.5px;padding:30px 20px;border-top:1px solid var(--line);font-family:var(--serif)}
+  .auth-bar{margin-top:16px;display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;font-size:14px}
+  .auth-bar input[type=text],.auth-bar input[type=password]{width:auto;min-width:140px;max-width:60vw;padding:9px 12px;border:1px solid var(--line);border-radius:8px;font-size:15px;font-family:var(--sans);background:var(--paper-2);color:var(--ink)}
+  .auth-bar input::placeholder{color:var(--ink-soft)}.auth-bar input:focus{outline:none;border-color:var(--terracotta);box-shadow:0 0 0 3px rgba(190,110,77,.16)}
+  .auth-bar .who{color:var(--terracotta-deep);font-weight:700;font-family:var(--serif)}.auth-bar .auth-err{color:var(--red);font-size:12px;min-height:14px;width:100%;text-align:center;margin-top:2px}
+
+  .meeting-box{margin-top:18px;display:inline-block;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:16px 26px;text-align:center;box-shadow:0 12px 30px -20px rgba(47,59,42,.3)}
+  .meeting-box .meeting-label{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-soft);font-weight:700;margin-bottom:6px}
+  .meeting-box .meeting-countdown{font-family:var(--serif);font-weight:600;font-size:28px;color:var(--terracotta-deep);letter-spacing:1px}
+  .meeting-box .meeting-when{font-family:var(--serif);font-size:14px;color:var(--ink-soft);margin-top:6px;font-style:italic}
+  .meeting-box .meeting-loc{font-size:13px;color:var(--ink);margin-top:2px}
+  .book-pick{margin:0 0 22px;padding-bottom:18px;border-bottom:1px solid var(--line)}
+  .book-pick label{display:block;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-soft);margin-bottom:10px}
+  .book-pick select{width:100%;padding:9px 12px;border:1px solid var(--line);border-radius:8px;font-size:15px;font-family:var(--sans);background:var(--paper-2);color:var(--ink)}
+  .rate-locked{text-align:center;color:var(--ink-soft);font-style:italic;font-family:var(--serif);padding:40px 20px;background:var(--paper);border:1px solid var(--line);border-radius:14px;box-shadow:0 12px 30px -20px rgba(47,59,42,.3)}
+  footer{text-align:center;color:var(--ink-soft);font-size:12.5px;padding:30px 20px;border-top:1px solid var(--line);font-family:var(--hand);font-size:16px}
+
 </style>
 </head>
 <body>
 <header class="site">
   <div class="crest"><span class="dot"></span> Est. 2025 <span class="dot"></span></div>
-  <h1 class="club" id="club-name">Booked and Busy</h1>
+  <div class="club-name">Booked and Busy</div>
   <div class="tagline">Book Clerb.</div>
   <div id="auth-bar" class="auth-bar"></div>
 </header>
 
 <nav class="tabs">
-  <button class="tab active" data-tab="current">📖 Current Book</button>
-  <button class="tab" data-tab="past">📚 Past Books</button>
-  <button class="tab" data-tab="rate">⭐ Rate &amp; Progress</button>
-  <button class="tab" data-tab="stats">📊 Reader Stats</button>
-  <button class="tab" data-tab="recommend">💡 Suggestions</button>
-  <button class="tab admin-tab" data-tab="admin">⚙️ Admin</button>
+  <button class="tab active" data-tab="current">Current book</button>
+  <button class="tab" data-tab="past">Past books</button>
+  <button class="tab" data-tab="rate">Rate &amp; progress</button>
+  <button class="tab" data-tab="stats">Reader stats</button>
+  <button class="tab" data-tab="recommend">Suggestions</button>
+  <button class="tab admin-tab" data-tab="admin">Admin</button>
 </nav>
 
 <main>
   <section class="panel active" id="panel-current">
-    <div class="hero">
+    <div class="current-card">
       <div class="cover-wrap"><img class="book-cover" id="cur-cover" alt="Current book cover"></div>
-      <h2 id="cur-title"></h2>
-      <div class="author" id="cur-author"></div>
-      <div class="rating-row">
-        <span class="stars static" id="cur-stars"></span>
-        <span class="num" id="cur-num">—</span>
-        <span class="count" id="cur-count"></span>
+      <div class="current-info">
+        <h2 id="cur-title"></h2>
+        <div class="author" id="cur-author"></div>
+        <div class="rating-row">
+          <span class="stars static" id="cur-stars"></span>
+          <span class="num" id="cur-num">—</span>
+          <span class="count" id="cur-count"></span>
+        </div>
+        <div class="status-pill" id="cur-status"></div>
+        <div class="cta-rate"><button class="btn btn-primary" data-go="rate">Rate this book &amp; update progress</button></div>
       </div>
-      <div class="status-pill" id="cur-status"></div>
-      <div class="meeting-box" id="meeting-box">
-        <h3>Next meeting</h3>
-        <div class="meeting-countdown" id="meeting-countdown">—</div>
-        <div class="meeting-when" id="meeting-when"></div>
-        <div class="meeting-loc" id="meeting-loc"></div>
-      </div>
-      <div class="cta-rate"><button class="btn btn-primary" data-go="rate">Rate this book &amp; update progress</button></div>
-      <div class="reviews" id="cur-reviews"></div>
     </div>
+    <div id="meeting-box" class="meeting-box" style="display:none">
+      <div class="meeting-label">🗓️ Next meeting</div>
+      <div class="meeting-countdown" id="meeting-countdown"></div>
+      <div class="meeting-when" id="meeting-when"></div>
+      <div class="meeting-loc" id="meeting-loc"></div>
+    </div>
+    <div class="reviews" id="cur-reviews"></div>
   </section>
 
   <section class="panel" id="panel-past">
@@ -300,19 +212,18 @@
   </section>
 
   <section class="panel" id="panel-rate">
-    <div id="rate-locked" class="rate-locked" style="display:none">Sign in above to rate this book and track your progress. Your ratings follow you across devices.</div>
+    <div id="rate-locked" class="rate-locked" style="display:none">Join the club above (name + passcode) to rate books and track your progress. Your ratings follow you across devices.</div>
     <div class="rate-grid">
       <div class="rate-side">
         <img id="rate-cover" alt="Book cover">
       </div>
       <div class="rate-card">
+        <div class="book-pick" id="book-pick-wrap" style="display:none">
+          <label>Which book are you rating?</label>
+          <select id="rate-book-select"></select>
+        </div>
         <h2 id="rate-title"></h2>
         <div class="author" id="rate-author"></div>
-
-        <div class="field">
-          <label>Which book are you rating?</label>
-          <select class="rate-book-sel" id="rate-book-select"></select>
-        </div>
 
         <div class="field">
           <label>Your name (shown on the stats page)</label>
@@ -357,7 +268,7 @@
     <p class="stats-note">Based on what your club (or a single member) rated highly — pulls similar titles from Open Library.</p>
     <div id="rec-controls" style="margin-bottom:18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
       <label style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-soft)">Taste from</label>
-      <select id="rec-source" style="padding:9px 12px;border:1px solid var(--line);border-radius:9px;font-size:15px;font-family:var(--sans);background:#fbfaf3">
+      <select id="rec-source" style="padding:9px 12px;border:1px solid var(--line);border-radius:9px;font-size:15px;font-family:var(--sans);background:var(--paper-2)">
         <option value="club">The whole club</option>
       </select>
       <button class="btn btn-primary" id="rec-go">✨ Find recommendations</button>
@@ -425,7 +336,7 @@
           </div>
         </div>
         <div class="form-row-actions">
-          <select id="f-section" style="padding:9px 12px;border:1px solid var(--line);border-radius:9px;font-size:15px;font-family:var(--sans);background:#fbfaf3">
+          <select id="f-section" style="padding:9px 12px;border:1px solid var(--line);border-radius:9px;font-size:15px;font-family:var(--sans);background:var(--paper-2)">
             <option value="past">Add to Past Books</option>
             <option value="current">Set as Current Book</option>
           </select>
@@ -437,21 +348,15 @@
       <div class="admin-card">
         <h3>🗓️ Next meeting</h3>
         <div class="form-grid">
-          <div class="field">
-            <label>When</label>
-            <input type="datetime-local" id="m-when">
-          </div>
-          <div class="field">
-            <label>Location</label>
-            <input type="text" id="m-loc" placeholder="e.g. The Back Room Café">
-          </div>
+          <div class="field"><label>Date &amp; time</label><input type="datetime-local" id="m-when" autocomplete="off"></div>
+          <div class="field"><label>Location (optional)</label><input type="text" id="m-loc" placeholder="e.g. The Rose Café"></div>
         </div>
         <div class="form-row-actions">
           <button class="btn btn-primary btn-sm" id="m-save">Save meeting</button>
-          <button class="btn btn-ghost btn-sm" id="m-clear">Clear</button>
+          <button class="btn btn-ghost btn-sm" id="m-clear">Clear upcoming</button>
           <span class="lookup-status" id="m-status"></span>
         </div>
-        <p class="hint" id="m-current" style="margin-top:10px;color:var(--ink-soft);font-size:12.5px;font-style:italic;font-family:var(--serif)"></p>
+        <p class="hint" id="m-current" style="margin:10px 0 0;color:var(--ink-soft);font-size:12.5px;font-style:italic;font-family:var(--serif)"></p>
       </div>
 
       <div class="admin-card">
@@ -485,14 +390,10 @@ const CONFIG = {
   membersTable: "members",
   ratingsTable: "book_club",
   wishlistTable: "wishlist",
+  meetingsTable: "meetings",
 
   // Passcode to unlock the Admin tab. CHANGE THIS to something only you know.
-  adminPasscode: "Oriana",
-
-  // Club passcode members enter to join (low-friction identity — no email needed).
-  clubPasscode: "booked",
-
-  meetingsTable: "meetings"
+  adminPasscode: "Oriana"
 };
 
 /* ============================================================ */
@@ -588,56 +489,62 @@ async function lookupByIsbn(isbn){
 }
 
 /* ============================================================ */
-/* --- Auth: name + club passcode (low-friction identity) -- */
+/* --- Identity: your name is your login ---------------------- */
+// uid = a stable id derived from the member's name (same name → same id,
+// on any device, no password). Not a real Supabase Auth user.
 let uid = null;
-let currentUser = null;
+let currentUser = null;   // { id, first, last, name, slug }
+let authToken = null;     // unused (no Supabase Auth session), kept so authHeaders() still works
 
-function sbHeaders(extra){
-  const h = { "apikey": CONFIG.supabaseAnonKey, "Content-Type": "application/json", "Authorization": "Bearer " + CONFIG.supabaseAnonKey };
+function authHeaders(extra){
+  const h = { "apikey": CONFIG.supabaseAnonKey, "Content-Type": "application/json" };
+  if(authToken) h["Authorization"] = "Bearer " + authToken;
+  else h["Authorization"] = "Bearer " + CONFIG.supabaseAnonKey;
   return Object.assign(h, extra||{});
 }
+// Data-layer headers: use the user token when signed in, anon key otherwise.
+function sbHeaders(extra){ return authHeaders(extra); }
 
-function getStoredIdentity(){
-  try{ const raw = localStorage.getItem("bc_identity"); if(raw) return JSON.parse(raw); }catch(e){}
-  return null;
+function memberName(){ return currentUser ? (currentUser.name||"") : ""; }
+function nameSlug(first, last){ return String((first||"").trim().toLowerCase()+"-"+(last||"").trim().toLowerCase()).replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"") || "anon"; }
+// Hash the name into a stable, uuid-shaped id — same name always resolves to
+// the same member, on any device, with nothing to remember but your name.
+async function idFromName(first, last){
+  const slug = nameSlug(first, last);
+  const bytes = new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(slug)));
+  bytes[6] = (bytes[6] & 0x0f) | 0x40;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+  const hex = Array.from(bytes.slice(0,16)).map(function(b){ return b.toString(16).padStart(2,"0"); }).join("");
+  return hex.slice(0,8)+"-"+hex.slice(8,12)+"-"+hex.slice(12,16)+"-"+hex.slice(16,20)+"-"+hex.slice(20,32);
 }
-function storeIdentity(name, passcode){
-  let id = getStoredIdentity();
-  if(!id) id = { uid: (crypto.randomUUID ? crypto.randomUUID() : "cl-"+Date.now()+"-"+Math.random().toString(36).slice(2)) };
-  id.name = name; id.passcode = passcode;
-  try{ localStorage.setItem("bc_identity", JSON.stringify(id)); }catch(e){}
-  return id;
+function setMember(m){ currentUser=m; uid=m?m.id:null; try{ if(m) localStorage.setItem("bc_member",JSON.stringify(m)); else localStorage.removeItem("bc_member"); }catch(e){} renderAuthBar(); refreshCurrent(); renderPast(); const active=document.querySelector(".tab.active"); if(active) activate(active.dataset.tab); }
+function clearMember(){ setMember(null); }
+async function restoreMember(){ let m=null; try{ m=JSON.parse(localStorage.getItem("bc_member")||"null"); }catch(e){} if(m&&m.id&&m.name){ setMember(m); } else { renderAuthBar(); } }
+async function joinClub(){
+  const first=(document.getElementById("auth-first").value||"").trim(), last=(document.getElementById("auth-last").value||"").trim(), err=document.getElementById("auth-err");
+  if(!err) return;
+  err.textContent="";
+  if(!first||!last){ err.textContent="Enter your first and last name."; return; }
+  const id = await idFromName(first,last);
+  const m={id:id,first:first,last:last,name:first+" "+last,slug:nameSlug(first,last)};
+  setMember(m);
+  ensureMember(memberName()).catch(function(){});
 }
-function clearIdentity(){ try{ localStorage.removeItem("bc_identity"); }catch(e){} }
+function signOutMember(){ clearMember(); }
+function renderAuthBar(){ const bar=document.getElementById("auth-bar"); if(!bar) return; if(currentUser){ bar.innerHTML='<span class="who">'+esc("Hi, "+memberName())+'</span><button class="btn btn-ghost btn-sm" id="signout-btn">Sign out</button>'; const so=document.getElementById("signout-btn"); if(so) so.addEventListener("click",signOutMember); return; } bar.innerHTML='<input type="text" id="auth-first" placeholder="first name" autocomplete="given-name"><input type="text" id="auth-last" placeholder="last name" autocomplete="family-name"><button class="btn btn-primary btn-sm" id="join-btn">Join club</button><span class="auth-err" id="auth-err"></span>'; const jb=document.getElementById("join-btn"); if(jb) jb.addEventListener("click",joinClub); const lf=document.getElementById("auth-last"); if(lf) lf.addEventListener("keydown",function(e){ if(e.key==="Enter") joinClub(); }); }
 
-function restoreSession(){
-  const id = getStoredIdentity();
-  if(id && id.name && id.passcode === CONFIG.clubPasscode){ uid = id.uid; currentUser = { name: id.name }; }
-  renderAuthBar(); refreshCurrent(); renderPast();
-  const active = document.querySelector(".tab.active"); if(active) activate(active.dataset.tab);
-}
+/* --- Meetings (next gathering + countdown) --- */
+let meetingTimer=null;
+async function getNextMeeting(){ const url=CONFIG.supabaseUrl+"/rest/v1/"+CONFIG.meetingsTable+"?order=meeting_at.asc&limit=1"; const res=await fetch(url,{headers:sbHeaders()}); if(!res.ok) throw new Error("meetings fetch failed"); const arr=await res.json(); return arr[0]||null; }
+function fmtCountdown(ms){ if(ms<=0) return "It's meeting time!"; const sec=Math.floor(ms/1000),d=Math.floor(sec/86400),h=Math.floor((sec%86400)/3600),m=Math.floor((sec%3600)/60),sx=sec%60, pad=function(n){return n<10?"0"+n:""+n;}; if(d>0) return d+"d "+pad(h)+":"+pad(m)+":"+pad(sx); return pad(h)+":"+pad(m)+":"+pad(sx); }
+function fmtWhen(iso){ try{ return new Date(iso).toLocaleString(undefined,{weekday:"short",month:"short",day:"numeric",hour:"numeric",minute:"2-digit"}); }catch(e){ return iso; } }
+function renderMeeting(m){ const box=document.getElementById("meeting-box"); if(!box) return; if(!m||!m.meeting_at){ box.style.display="none"; if(meetingTimer){clearInterval(meetingTimer);meetingTimer=null;} return; } box.style.display="block"; const when=document.getElementById("meeting-when"), loc=document.getElementById("meeting-loc"); if(when) when.textContent=fmtWhen(m.meeting_at); if(loc) loc.textContent=m.location?("📍 "+m.location):""; function tick(){ const ms=new Date(m.meeting_at).getTime()-Date.now(); const cd=document.getElementById("meeting-countdown"); if(cd) cd.textContent=fmtCountdown(ms); if(ms<=0&&meetingTimer){clearInterval(meetingTimer);meetingTimer=null;} } tick(); if(meetingTimer) clearInterval(meetingTimer); meetingTimer=setInterval(tick,1000); }
+async function loadMeeting(){ try{ renderMeeting(await getNextMeeting()); }catch(e){ const box=document.getElementById("meeting-box"); if(box) box.style.display="none"; } }
+function toLocalInput(iso){ try{ const d=new Date(iso); const off=d.getTimezoneOffset()*60000; return new Date(d.getTime()-off).toISOString().slice(0,16); }catch(e){ return ""; } }
+async function clearMeetings(){ const res=await fetch(CONFIG.supabaseUrl+"/rest/v1/"+CONFIG.meetingsTable,{method:"DELETE",headers:sbHeaders()}); if(!res.ok) throw new Error("meeting clear failed"); }
+async function saveMeeting(whenLocal,location,bookId){ await clearMeetings(); const body={book_id:bookId||null,meeting_at:new Date(whenLocal).toISOString(),location:location||null}; const res=await fetch(CONFIG.supabaseUrl+"/rest/v1/"+CONFIG.meetingsTable,{method:"POST",headers:sbHeaders({"Prefer":"return=representation"}),body:JSON.stringify(body)}); if(!res.ok) throw new Error("meeting save failed"); }
+async function loadAdminMeeting(){ try{ const m=await getNextMeeting(); const when=document.getElementById("m-when"), loc=document.getElementById("m-loc"), cur=document.getElementById("m-current"); if(m&&m.meeting_at){ if(when) when.value=toLocalInput(m.meeting_at); if(loc) loc.value=m.location||""; if(cur) cur.textContent="Current: "+fmtWhen(m.meeting_at)+(m.location?(" · "+m.location):""); } else { if(when) when.value=""; if(loc) loc.value=""; if(cur) cur.textContent="No upcoming meeting set."; } }catch(e){ const cur=document.getElementById("m-current"); if(cur) cur.textContent="Run the meetings SQL (see README) to enable this."; } }
 
-function renderAuthBar(){
-  const bar = document.getElementById("auth-bar"); if(!bar) return;
-  if(currentUser){
-    bar.innerHTML = '<span class="who">' + esc(currentUser.name) + '</span>' + '<button class="btn btn-ghost btn-sm" id="signout-btn">Sign out</button>';
-    document.getElementById("signout-btn").addEventListener("click", function(){ clearIdentity(); uid=null; currentUser=null; renderAuthBar(); refreshCurrent(); renderPast(); const a=document.querySelector(".tab.active"); if(a) activate(a.dataset.tab); });
-    return;
-  }
-  bar.innerHTML = '<input type="text" id="auth-first" placeholder="First name" autocomplete="given-name">' + '<input type="text" id="auth-last" placeholder="Last name" autocomplete="family-name">' + '<input type="password" id="auth-pass" placeholder="Club passcode" autocomplete="off">' + '<button class="btn btn-primary btn-sm" id="signin-btn">Join</button>' + '<span class="auth-err" id="auth-err"></span>';
-  const err = document.getElementById("auth-err");
-  document.getElementById("signin-btn").addEventListener("click", function(){
-    err.textContent="";
-    const first = document.getElementById("auth-first").value.trim(), last = document.getElementById("auth-last").value.trim(), pass = document.getElementById("auth-pass").value;
-    if(!first || !pass){ err.textContent = "Enter your name and the club passcode."; return; }
-    if(pass !== CONFIG.clubPasscode){ err.textContent = "Wrong passcode — check with your club admin."; return; }
-    const name = (first + " " + last).trim();
-    const id = storeIdentity(name, pass);
-    uid = id.uid; currentUser = { name: name };
-    renderAuthBar(); refreshCurrent(); renderPast();
-    const a=document.querySelector(".tab.active"); if(a) activate(a.dataset.tab);
-  });
-}
 function dbRowToBook(row){
   return {
     id: row.id,
@@ -683,12 +590,12 @@ async function upsertBookRow(book, status, position){
     headers: sbHeaders({"Prefer":"resolution=merge-duplicates"}),
     body: JSON.stringify(body)
   });
-  if(!res.ok){ var t=""; try{ t=await res.text(); }catch(_){} throw new Error("book upsert failed ("+res.status+"): "+t); }
+  if(!res.ok){ let d={}; try{ d=await res.json(); }catch(e){} throw new Error("book upsert failed: "+(d.message||d.error||res.status)); }
 }
 async function deleteBookRow(id){
   const url = CONFIG.supabaseUrl+"/rest/v1/"+CONFIG.booksTable+"?id=eq."+encodeURIComponent(id);
   const res = await fetch(url, {method:"DELETE", headers: sbHeaders()});
-  if(!res.ok){ var t=""; try{ t=await res.text(); }catch(_){} throw new Error("book delete failed ("+res.status+"): "+t); }
+  if(!res.ok) throw new Error("book delete failed");
 }
 
 // --- Members -----------------------------------------------
@@ -791,46 +698,6 @@ async function saveRecord(bookId, fields){
   if(!res.ok) throw new Error("save failed");
 }
 
-// --- Meetings ---
-async function getNextMeeting(){
-  const url = CONFIG.supabaseUrl+"/rest/v1/"+CONFIG.meetingsTable+"?select=id,book_id,meeting_at,location&order=meeting_at.asc&limit=1";
-  const res = await fetch(url, {headers: sbHeaders()}); if(!res.ok) throw new Error("meeting fetch failed");
-  const arr = await res.json(); if(!arr.length) return null;
-  const m = arr[0]; if(new Date(m.meeting_at).getTime() < Date.now() - 86400000) return null; return m;
-}
-async function clearMeetings(){ const res = await fetch(CONFIG.supabaseUrl+"/rest/v1/"+CONFIG.meetingsTable, {method:"DELETE", headers: sbHeaders()}); if(!res.ok) throw new Error("meeting clear failed"); }
-async function saveMeeting(whenLocal, location, bookId){
-  await clearMeetings();
-  const body = { book_id: bookId||null, meeting_at: new Date(whenLocal).toISOString(), location: location||null };
-  const res = await fetch(CONFIG.supabaseUrl+"/rest/v1/"+CONFIG.meetingsTable, {method:"POST", headers: sbHeaders({"Prefer":"return=representation"}), body: JSON.stringify(body)});
-  if(!res.ok) throw new Error("meeting save failed");
-}
-function toLocalInput(iso){ const d=new Date(iso); return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,16); }
-function fmtWhen(iso){ try{ return new Date(iso).toLocaleString(undefined, {weekday:"short",month:"short",day:"numeric",hour:"numeric",minute:"2-digit"}); }catch(e){ return iso; } }
-function fmtCountdown(targetIso){
-  const ms = new Date(targetIso).getTime() - Date.now(); if(ms<0) return "Now / recently passed";
-  const d=Math.floor(ms/86400000),h=Math.floor((ms%86400000)/3600000),m=Math.floor((ms%3600000)/60000),s=Math.floor((ms%60000)/1000);
-  const p=[]; if(d>0)p.push(d+"d"); if(h>0||d>0)p.push(h+"h"); p.push(m+"m");p.push(s+"s"); return p.join(" ");
-}
-let meetingTimer=null;
-function renderMeeting(m){
-  const box=document.getElementById("meeting-box"); if(!box)return;
-  if(!m||!m.meeting_at){ box.style.display="none"; if(meetingTimer){clearInterval(meetingTimer);meetingTimer=null;} return; }
-  box.style.display="block";
-  document.getElementById("meeting-when").textContent=fmtWhen(m.meeting_at);
-  document.getElementById("meeting-loc").textContent=m.location?("\u{1F4CD} "+m.location):"";
-  if(meetingTimer){clearInterval(meetingTimer);meetingTimer=null;}
-  const tick=function(){document.getElementById("meeting-countdown").textContent=fmtCountdown(m.meeting_at);};
-  tick(); meetingTimer=setInterval(tick,1000);
-}
-async function loadMeeting(){ try{renderMeeting(await getNextMeeting());}catch(e){const b=document.getElementById("meeting-box");if(b)b.style.display="none";} }
-async function loadAdminMeeting(){
-  try{ const m=await getNextMeeting(); const w=document.getElementById("m-when"),l=document.getElementById("m-loc"),c=document.getElementById("m-current");
-    if(m&&m.meeting_at){ if(w)w.value=toLocalInput(m.meeting_at); if(l)l.value=m.location||""; if(c)c.textContent="Current: "+fmtWhen(m.meeting_at)+(m.location?(" \u00B7 "+m.location):""); }
-    else{ if(w)w.value=""; if(l)l.value=""; if(c)c.textContent="No upcoming meeting set."; }
-  }catch(e){ const c=document.getElementById("m-current"); if(c)c.textContent="Run the meetings SQL (see README) to enable this."; }
-}
-
 function slugify(title){
   return String(title||"").toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"") || "book-"+Math.random().toString(36).slice(2,7);
 }
@@ -875,7 +742,7 @@ function renderStarsInput(el, value){
 
 /* ============================================================ */
 /* --- State + wiring ---------------------------------------- */
-const state = { myRating:0, myProgress:0, myFinished:false, myName:"", myReview:"", existingStartedAt:null, activeBook:null };
+const state = { myRating:0, myProgress:0, myFinished:false, myName:"", myReview:"", existingStartedAt:null, activeRateBookId:null };
 let BOOKS = null;
 let adminUnlocked = false;
 
@@ -895,7 +762,6 @@ function activate(name){
 
 /* --- Current book + past rendering ------------------------- */
 function cb(){ return BOOKS && BOOKS.currentBook; }
-function rb(){ return state.activeBook || cb(); }
 function refreshCurrent(){
   const cur = cb();
   setCover(document.getElementById("cur-cover"), cur);
@@ -948,8 +814,7 @@ function renderPast(){
     card.innerHTML = '<img alt="'+esc(b.title)+' cover">'+
       '<h3>'+esc(b.title)+'</h3>'+
       '<div class="author">'+esc(b.author)+'</div>'+
-      '<div class="grp"><span class="stars static" data-stars></span><span class="num"></span> <span class="count"></span></div>'+
-      '<button class="btn btn-ghost btn-sm" style="margin-top:8px" data-rate-book="'+esc(b.id)+'">\u2B50 Rate / update</button>';
+      '<div class="grp"><span class="stars static" data-stars></span><span class="num"></span> <span class="count"></span></div>';
     grid.appendChild(card);
     setCover(card.querySelector("img"), b);
     try{
@@ -959,8 +824,6 @@ function renderPast(){
       card.querySelector(".num").textContent = a.avg? a.avg.toFixed(1):"—";
       card.querySelector(".count").textContent = a.ratedCount? "("+a.ratedCount+")":"";
     }catch(e){}
-    var rateBtn = card.querySelector("[data-rate-book]");
-    if(rateBtn) rateBtn.addEventListener("click", function(){ activeRateBook(b.id); activate("rate"); });
   });
 }
 
@@ -971,44 +834,34 @@ function showRateLocked(locked){
   if(lock) lock.style.display = locked ? "block":"none";
   if(grid) grid.style.display = locked ? "none":"grid";
 }
-function activeRateBook(bookId){
-  var all = BOOKS?((BOOKS.currentBook?[BOOKS.currentBook]:[]).concat(BOOKS.pastBooks||[])):[];
-  var book = all.find(function(b){return b.id===bookId;}); if(!book) return;
-  state.activeBook = book;
-  var sel = document.getElementById("rate-book-select"); if(sel) sel.value = bookId;
-  if(!uid){ showRateLocked(true); return; }
-  loadRatePanel();
-}
 function loadRatePanel(){
   if(!uid){ showRateLocked(true); return; }
   showRateLocked(false);
-  var cur = rb();
-  var sel = document.getElementById("rate-book-select");
-  if(sel && BOOKS){
-    var all = (BOOKS.currentBook?[BOOKS.currentBook]:[]).concat(BOOKS.pastBooks||[]);
-    var curVal = state.activeBook ? state.activeBook.id : (BOOKS.currentBook?BOOKS.currentBook.id:"");
-    sel.innerHTML = all.map(function(b){ var lbl=b.title+(b===BOOKS.currentBook?" (current)":""); return '<option value="'+esc(b.id)+'"'+(b.id===curVal?' selected':'')+'>'+esc(lbl)+'</option>'; }).join("");
-  }
+  const cur = cb();
   setCover(document.getElementById("rate-cover"), cur);
-  document.getElementById("rate-title").textContent = cur ? cur.title : "No book selected";
+  document.getElementById("rate-title").textContent = cur ? cur.title : "No current book";
   document.getElementById("rate-author").textContent = cur ? "by " + cur.author : "";
   document.getElementById("pages-of").textContent = cur ? "/ "+cur.totalPages+" pages" : "/ — pages";
   if(!cur){ document.getElementById("rate-stars").innerHTML=""; document.getElementById("review").value=""; return; }
   Promise.all([getMyRecord(cur.id), getMyMember()]).then(function(results){
-    var my = results[0], mem = results[1];
-    state.myRating = (my && my.rating) || 0; state.myProgress = (my && my.progress) || 0;
-    state.myFinished = !!(my && my.finished); state.myName = (mem && mem.name) || "";
-    state.myReview = (my && my.review) || ""; state.existingStartedAt = (my && my.started_at) || null;
+    const my = results[0], mem = results[1];
+    state.myRating = (my && my.rating) || 0;
+    state.myProgress = (my && my.progress) || 0;
+    state.myFinished = !!(my && my.finished);
+    state.myName = (mem && mem.name) || "";
+    state.myReview = (my && my.review) || "";
+    state.existingStartedAt = (my && my.started_at) || null;
     document.getElementById("my-name").value = state.myName;
     document.getElementById("pages").value = state.myProgress || "";
     document.getElementById("range").value = Math.min(100, Math.round(state.myProgress/cur.totalPages*100));
     document.getElementById("finished").checked = state.myFinished;
     document.getElementById("review").value = state.myReview;
-    renderStarsInput(document.getElementById("rate-stars"), state.myRating); updatePct();
+    renderStarsInput(document.getElementById("rate-stars"), state.myRating);
+    updatePct();
   }).catch(function(){ renderStarsInput(document.getElementById("rate-stars"), 0); });
 }
 function updatePct(){
-  const cur = rb(); if(!cur) return;
+  const cur = cb(); if(!cur) return;
   const p = parseInt(document.getElementById("pages").value)||0;
   const pct = Math.min(100, Math.round(p/cur.totalPages*100));
   document.getElementById("pct").textContent = pct+"%";
@@ -1017,7 +870,7 @@ function updatePct(){
 }
 document.getElementById("pages").addEventListener("input", updatePct);
 document.getElementById("range").addEventListener("input", function(){
-  const cur = rb(); if(!cur) return;
+  const cur = activeRateBook(); if(!cur) return;
   const pct = parseInt(document.getElementById("range").value);
   document.getElementById("pages").value = Math.round(pct/100*cur.totalPages);
   document.getElementById("pct").textContent = pct+"%";
@@ -1025,8 +878,8 @@ document.getElementById("range").addEventListener("input", function(){
 document.getElementById("finished").addEventListener("change", function(e){ state.myFinished = e.target.checked; });
 
 async function doSave(forceFinished){
-  if(!uid) return;
-  const cur = rb(); if(!cur) return;
+  if(!uid) return;  // must be signed in to save
+  const cur = cb(); if(!cur) return;
   const errEl = document.getElementById("err"); errEl.textContent="";
   const p = parseInt(document.getElementById("pages").value)||0;
   if(p<0||p>cur.totalPages){ errEl.textContent = "Pages must be between 0 and "+cur.totalPages+"."; return; }
@@ -1051,15 +904,20 @@ async function doSave(forceFinished){
     setTimeout(function(){document.getElementById("saved").classList.remove("show");}, 2000);
     refreshCurrent();
     renderStats();
-  }catch(e){ errEl.textContent = "Could not save: "+(e.message||"Check your Supabase setup and connection."); }
+  }catch(e){ errEl.textContent = "Could not save. Check your Supabase setup and connection."; }
 }
 document.getElementById("save").addEventListener("click", function(){doSave();});
-document.getElementById("rate-book-select").addEventListener("change", function(){
-  var bookId = this.value;
-  var all = BOOKS?((BOOKS.currentBook?[BOOKS.currentBook]:[]).concat(BOOKS.pastBooks||[])):[];
-  state.activeBook = all.find(function(b){return b.id===bookId;})||null;
-  loadRatePanel();
-});
+
+
+/* --- Retroactive ratings (rate ANY current/past book) --- */
+function allBooks(){ const list=[]; if(BOOKS&&BOOKS.currentBook) list.push(BOOKS.currentBook); if(BOOKS&&BOOKS.pastBooks) list=list.concat(BOOKS.pastBooks); return list; }
+function activeRateBook(){ if(state.activeRateBookId){ const b=allBooks().find(function(x){return x.id===state.activeRateBookId;}); if(b) return b; } return cb(); }
+function buildRateBookSelect(){ const sel=document.getElementById("rate-book-select"), wrap=document.getElementById("book-pick-wrap"); if(!sel||!wrap) return; const list=allBooks(); if(list.length<=1){ wrap.style.display="none"; return; } wrap.style.display="block"; sel.innerHTML=list.map(function(b){ const label=(b===cb()?"📖 ":"📚 ")+b.title+(b.author?(" — "+b.author):""); return '<option value="'+esc(b.id)+'"'+(b.id===state.activeRateBookId?" selected":"")+'>'+esc(label)+'</option>'; }).join(""); }
+function loadRatePanel(bookId){ if(bookId) state.activeRateBookId=bookId; if(!uid){ showRateLocked(true); return; } showRateLocked(false); const cur=activeRateBook(); if(!cur) return; setCover(document.getElementById("rate-cover"), cur); document.getElementById("rate-title").textContent=cur.title; document.getElementById("rate-author").textContent="by "+cur.author; document.getElementById("pages-of").textContent="/ "+(cur.totalPages||"?")+" pages"; const range=document.getElementById("range"); range.max=cur.totalPages||100; buildRateBookSelect(); getMyRecord(cur.id).then(function(my){ return getMyMember().then(function(member){ state.myRating=my?(my.rating||0):0; state.myProgress=my?(my.progress||0):0; state.myFinished=my?!!my.finished:false; state.myReview=my?(my.review||""):""; state.existingStartedAt=my?(my.started_at||null):null; state.myName=member?(member.name||""):""; document.getElementById("my-name").value=state.myName||memberName(); renderStarsInput(document.getElementById("rate-stars"), state.myRating); document.getElementById("pages").value=state.myProgress; document.getElementById("range").value=state.myProgress; document.getElementById("finished").checked=state.myFinished; document.getElementById("review").value=state.myReview; updatePct(); }); }).catch(function(){ renderStarsInput(document.getElementById("rate-stars"), 0); document.getElementById("my-name").value=memberName(); }); }
+function updatePct(){ const cur=activeRateBook(); if(!cur) return; const p=parseInt(document.getElementById("pages").value)||0; const pct=Math.min(100,Math.round(p/(cur.totalPages||1)*100)); document.getElementById("pct").textContent=pct+"%"; document.getElementById("range").value=Math.min(p,cur.totalPages||p); }
+async function doSave(forceFinished){ if(!uid) return; const cur=activeRateBook(); if(!cur) return; const errEl=document.getElementById("err"); errEl.textContent=""; const savedEl=document.getElementById("saved"); const rating=state.myRating, progress=parseInt(document.getElementById("pages").value)||0, finished=forceFinished||document.getElementById("finished").checked, review=document.getElementById("review").value.trim(), name=(document.getElementById("my-name").value||"").trim()||memberName(); state.myName=name; try{ await ensureMember(name); await saveRecord(cur.id,{rating:rating||null,progress:progress,finished:finished,review:review||null,started_at:state.existingStartedAt||new Date().toISOString()}); savedEl.classList.add("show"); setTimeout(function(){ savedEl.classList.remove("show"); },1600); refreshCurrent(); renderPast(); }catch(e){ errEl.textContent="Could not save: "+(e.message||"try again"); } }
+(function(){ const sel=document.getElementById("rate-book-select"); if(sel) sel.addEventListener("change", function(){ state.activeRateBookId=sel.value||null; loadRatePanel(state.activeRateBookId); }); })();
+function renderPast(){ const grid=document.getElementById("past-grid"); grid.innerHTML=""; const list=(BOOKS&&BOOKS.pastBooks)||[]; if(!list.length){ grid.innerHTML='<div class="empty">No past books yet.</div>'; return; } list.forEach(async function(b){ const card=document.createElement("div"); card.className="past-card"; card.innerHTML='<img alt="'+esc(b.title)+' cover"><h3>'+esc(b.title)+'</h3><div class="author">'+esc(b.author)+'</div><div class="grp"><span class="stars static" data-stars></span><span class="num"></span> <span class="count"></span></div>'+(uid?'<button class="btn btn-ghost btn-sm rate-this-btn" data-rate="'+esc(b.id)+'">⭐ Rate / update</button>':''); grid.appendChild(card); setCover(card.querySelector("img"), b); const rb=card.querySelector("[data-rate]"); if(rb) rb.addEventListener("click", function(){ state.activeRateBookId=b.id; activate("rate"); }); try{ const recs=await getAllForBook(b.id); const a=aggregate(recs); renderStarsStatic(card.querySelector("[data-stars]"), a.avg); card.querySelector(".num").textContent=a.avg?a.avg.toFixed(1):"—"; card.querySelector(".count").textContent=a.ratedCount?"("+a.ratedCount+")":""; }catch(e){} }); }
 
 /* --- Reader stats ------------------------------------------ */
 async function renderStats(){
@@ -1179,7 +1037,7 @@ async function buildRecommendations(){
   const grid = document.getElementById("rec-grid");
   const status = document.getElementById("rec-status");
   grid.innerHTML = "";
-  setRecStatus("", "Reading ratings…");
+  setRecStatus("", "Reading the ratings…");
   try{
     if(!BOOKS){ BOOKS = await loadBookList(); }
     const all = (BOOKS.currentBook?[BOOKS.currentBook]:[]).concat(BOOKS.pastBooks||[]);
@@ -1405,7 +1263,22 @@ document.getElementById("wl-refresh").addEventListener("click", loadWishlist);
 /* ============================================================ */
 /* --- Admin panel ------------------------------------------- */
 function maybeLoadAdmin(){
-  if(adminUnlocked){ showAdminContent(); renderAdminTables(); loadAdminMeeting(); }
+  if(adminUnlocked){
+    showAdminContent(); renderAdminTables(); loadAdminMeeting();
+    const ms=document.getElementById("m-save");
+    if(ms&&!ms.dataset.wired){ ms.dataset.wired="1"; ms.addEventListener("click", async function(){
+      const st=document.getElementById("m-status"), when=document.getElementById("m-when").value, loc=document.getElementById("m-loc").value;
+      st.className="lookup-status"; st.textContent="Saving…";
+      if(!when){ st.className="lookup-status err"; st.textContent="Pick a date & time."; return; }
+      try{ const bid=BOOKS&&BOOKS.currentBook?BOOKS.currentBook.id:null; await saveMeeting(when,loc,bid); st.className="lookup-status ok"; st.textContent="Saved ✓"; await loadMeeting(); await loadAdminMeeting(); }
+      catch(e){ st.className="lookup-status err"; st.textContent="Could not save: "+(e.message||"run meetings SQL"); }
+    }); }
+    const mc=document.getElementById("m-clear");
+    if(mc&&!mc.dataset.wired){ mc.dataset.wired="1"; mc.addEventListener("click", async function(){
+      const st=document.getElementById("m-status"); try{ await clearMeetings(); st.className="lookup-status ok"; st.textContent="Cleared ✓"; await loadMeeting(); await loadAdminMeeting(); }
+      catch(e){ st.className="lookup-status err"; st.textContent="Could not clear: "+(e.message||"run meetings SQL"); }
+    }); }
+  }
 }
 document.getElementById("gate-btn").addEventListener("click", tryUnlock);
 document.getElementById("admin-pass").addEventListener("keydown", function(e){ if(e.key==="Enter") tryUnlock(); });
@@ -1439,7 +1312,7 @@ function bookRow(book, isCurrent){
   return '<table class="books-table"><tr>'+
     '<td><img class="mini" alt=""></td>'+
     '<td><div class="title">'+esc(book.title)+'</div><div class="author">'+esc(book.author)+'</div>'+
-      '<div class="isbn">ISBN '+(book.isbn?esc(book.isbn):"—")+' · '+book.totalPages+' pp</div></td>'+
+      '<div class="isbn">ISBN '+(book.isbn?esc(book.isbn):"—")+' · '+book.totalPages+' pages</div></td>'+
     '<td class="row-btns">'+
       '<button class="icon-btn" data-edit="'+(isCurrent?"current":book.id)+'">Edit</button>'+
       '<button class="icon-btn danger" data-del="'+(isCurrent?"current":book.id)+'">Delete</button>'+
@@ -1505,7 +1378,7 @@ document.getElementById("add-btn").addEventListener("click", async function(){
     document.getElementById("add-btn").textContent="Add book";
     renderAdminTables(); refreshCurrent(); renderPast();
   }catch(e){
-    status.className="lookup-status err"; status.textContent="Could not save: "+(e.message||"try again");
+    status.className="lookup-status err"; status.textContent="Could not save: "+(e.message||"try again — check Supabase SQL/RLS");
   }
 });
 
@@ -1599,24 +1472,11 @@ async function deleteBook(key){
   }
 }
 
-/* --- Meeting admin wiring --- */
-document.getElementById("m-save").addEventListener("click", async function(){
-  var st=document.getElementById("m-status"), when=document.getElementById("m-when").value, loc=document.getElementById("m-loc").value;
-  if(!when){ st.className="lookup-status err"; st.textContent="Pick a date and time."; return; }
-  st.className="lookup-status"; st.textContent="Saving…";
-  try{ var bid=BOOKS&&BOOKS.currentBook?BOOKS.currentBook.id:null; await saveMeeting(when,loc,bid); st.className="lookup-status ok"; st.textContent="Saved \u2713"; await loadMeeting(); await loadAdminMeeting(); }
-  catch(e){ st.className="lookup-status err"; st.textContent="Could not save: "+(e.message||"try again"); }
-});
-document.getElementById("m-clear").addEventListener("click", async function(){
-  var st=document.getElementById("m-status");
-  try{ await clearMeetings(); st.className="lookup-status ok"; st.textContent="Cleared \u2713"; await loadMeeting(); await loadAdminMeeting(); }
-  catch(e){ st.className="lookup-status err"; st.textContent="Could not clear: "+(e.message||"try again"); }
-});
-
 /* ============================================================ */
 /* --- Boot --------------------------------------------------- */
 (async function boot(){
-  await restoreSession();   // sets uid + authToken if a session exists
+  renderAuthBar();
+  await restoreMember();
   try{ BOOKS = await loadBookList(); }
   catch(e){ BOOKS = { currentBook:null, pastBooks:[] }; }
   if(!BOOKS.pastBooks) BOOKS.pastBooks=[];

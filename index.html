@@ -757,7 +757,7 @@ function renderStarsInput(el, value){
     wrap.className="star-wrap";
     wrap.innerHTML =
       '<span class="star-bg">'+STAR+'</span>'+
-      '<span class="star-fg"></span>';
+      '<span class="star-fg">'+STAR+'</span>';
     function halfOf(e){
       const rect = wrap.getBoundingClientRect();
       const frac = rect.width ? (e.clientX-rect.left)/rect.width : 1;
@@ -834,30 +834,6 @@ function renderReviews(recs, names){
       return '<div class="review-item"><div class="who">'+who+'</div><div class="what">'+esc(String(r.review).trim())+'</div></div>';
     }).join("");
 }
-function renderPast(){
-  const grid = document.getElementById("past-grid");
-  grid.innerHTML="";
-  const list = (BOOKS && BOOKS.pastBooks) || [];
-  if(!list.length){ grid.innerHTML='<div class="empty">No past books yet.</div>'; return; }
-  list.forEach(async function(b){
-    const card = document.createElement("div");
-    card.className="past-card";
-    card.innerHTML = '<img alt="'+esc(b.title)+' cover">'+
-      '<h3>'+esc(b.title)+'</h3>'+
-      '<div class="author">'+esc(b.author)+'</div>'+
-      '<div class="grp"><span class="stars static" data-stars></span><span class="num"></span> <span class="count"></span></div>';
-    grid.appendChild(card);
-    setCover(card.querySelector("img"), b);
-    try{
-      const recs = await getAllForBook(b.id);
-      const a = aggregate(recs);
-      renderStarsStatic(card.querySelector("[data-stars]"), a.avg);
-      card.querySelector(".num").textContent = a.avg? a.avg.toFixed(1):"—";
-      card.querySelector(".count").textContent = a.ratedCount? "("+a.ratedCount+")":"";
-    }catch(e){}
-  });
-}
-
 /* --- Rate panel -------------------------------------------- */
 function showRateLocked(locked){
   const lock=document.getElementById("rate-locked");
@@ -865,79 +841,14 @@ function showRateLocked(locked){
   if(lock) lock.style.display = locked ? "block":"none";
   if(grid) grid.style.display = locked ? "none":"grid";
 }
-function loadRatePanel(){
-  if(!uid){ showRateLocked(true); return; }
-  showRateLocked(false);
-  const cur = cb();
-  setCover(document.getElementById("rate-cover"), cur);
-  document.getElementById("rate-title").textContent = cur ? cur.title : "No current book";
-  document.getElementById("rate-author").textContent = cur ? "by " + cur.author : "";
-  document.getElementById("pages-of").textContent = cur ? "/ "+cur.totalPages+" pages" : "/ — pages";
-  if(!cur){ document.getElementById("rate-stars").innerHTML=""; document.getElementById("review").value=""; return; }
-  Promise.all([getMyRecord(cur.id), getMyMember()]).then(function(results){
-    const my = results[0], mem = results[1];
-    state.myRating = (my && my.rating) || 0;
-    state.myProgress = (my && my.progress) || 0;
-    state.myFinished = !!(my && my.finished);
-    state.myName = (mem && mem.name) || "";
-    state.myReview = (my && my.review) || "";
-    state.existingStartedAt = (my && my.started_at) || null;
-    document.getElementById("my-name").value = state.myName;
-    document.getElementById("pages").value = state.myProgress || "";
-    document.getElementById("range").value = Math.min(100, Math.round(state.myProgress/cur.totalPages*100));
-    document.getElementById("finished").checked = state.myFinished;
-    document.getElementById("review").value = state.myReview;
-    renderStarsInput(document.getElementById("rate-stars"), state.myRating);
-    updatePct();
-  }).catch(function(){ renderStarsInput(document.getElementById("rate-stars"), 0); });
-}
-function updatePct(){
-  const cur = cb(); if(!cur) return;
-  const p = parseInt(document.getElementById("pages").value)||0;
-  const pct = Math.min(100, Math.round(p/cur.totalPages*100));
-  document.getElementById("pct").textContent = pct+"%";
-  document.getElementById("range").value = pct;
-  if(p>=cur.totalPages){ document.getElementById("finished").checked = true; state.myFinished = true; }
-}
 document.getElementById("pages").addEventListener("input", updatePct);
 document.getElementById("range").addEventListener("input", function(){
-  const cur = activeRateBook(); if(!cur) return;
-  const pct = parseInt(document.getElementById("range").value);
-  document.getElementById("pages").value = Math.round(pct/100*cur.totalPages);
-  document.getElementById("pct").textContent = pct+"%";
+  // range's own value IS the page number (max is set to the book's totalPages
+  // in loadRatePanel) — sync pages to it directly, don't treat it as a percent.
+  document.getElementById("pages").value = document.getElementById("range").value;
+  updatePct();
 });
 document.getElementById("finished").addEventListener("change", function(e){ state.myFinished = e.target.checked; });
-
-async function doSave(forceFinished){
-  if(!uid) return;  // must be signed in to save
-  const cur = cb(); if(!cur) return;
-  const errEl = document.getElementById("err"); errEl.textContent="";
-  const p = parseInt(document.getElementById("pages").value)||0;
-  if(p<0||p>cur.totalPages){ errEl.textContent = "Pages must be between 0 and "+cur.totalPages+"."; return; }
-  const finished = forceFinished!==undefined ? forceFinished : document.getElementById("finished").checked;
-  state.myFinished = finished;
-  document.getElementById("finished").checked = finished;
-  const name = document.getElementById("my-name").value.trim();
-  state.myName = name;
-  const now = new Date().toISOString();
-  const setStartedAt = (!state.existingStartedAt && p>0) ? now : null;
-  const review = document.getElementById("review").value.trim();
-  state.myReview = review;
-  const fields = { rating: state.myRating || null, progress: finished ? cur.totalPages : p, finished: finished, review: review || null };
-  if(setStartedAt) fields.started_at = setStartedAt;
-  if(finished){ document.getElementById("pages").value = cur.totalPages; updatePct(); }
-  try{
-    const tasks = [saveRecord(cur.id, fields)];
-    if(name) tasks.push(ensureMember(name));   // store name once, in members
-    await Promise.all(tasks);
-    state.existingStartedAt = state.existingStartedAt || setStartedAt;
-    document.getElementById("saved").classList.add("show");
-    setTimeout(function(){document.getElementById("saved").classList.remove("show");}, 2000);
-    refreshCurrent();
-    renderStats();
-  }catch(e){ errEl.textContent = "Could not save. Check your Supabase setup and connection."; }
-}
-document.getElementById("save").addEventListener("click", function(){doSave();});
 
 
 /* --- Retroactive ratings (rate ANY current/past book) --- */
@@ -947,6 +858,7 @@ function buildRateBookSelect(){ const sel=document.getElementById("rate-book-sel
 function loadRatePanel(bookId){ if(bookId) state.activeRateBookId=bookId; if(!uid){ showRateLocked(true); return; } showRateLocked(false); const cur=activeRateBook(); if(!cur) return; setCover(document.getElementById("rate-cover"), cur); document.getElementById("rate-title").textContent=cur.title; document.getElementById("rate-author").textContent="by "+cur.author; document.getElementById("pages-of").textContent="/ "+(cur.totalPages||"?")+" pages"; const range=document.getElementById("range"); range.max=cur.totalPages||100; buildRateBookSelect(); getMyRecord(cur.id).then(function(my){ return getMyMember().then(function(member){ state.myRating=my?(my.rating||0):0; state.myProgress=my?(my.progress||0):0; state.myFinished=my?!!my.finished:false; state.myReview=my?(my.review||""):""; state.existingStartedAt=my?(my.started_at||null):null; state.myName=member?(member.name||""):""; document.getElementById("my-name").value=state.myName||memberName(); renderStarsInput(document.getElementById("rate-stars"), state.myRating); document.getElementById("pages").value=state.myProgress; document.getElementById("range").value=state.myProgress; document.getElementById("finished").checked=state.myFinished; document.getElementById("review").value=state.myReview; updatePct(); }); }).catch(function(){ renderStarsInput(document.getElementById("rate-stars"), 0); document.getElementById("my-name").value=memberName(); }); }
 function updatePct(){ const cur=activeRateBook(); if(!cur) return; const p=parseInt(document.getElementById("pages").value)||0; const pct=Math.min(100,Math.round(p/(cur.totalPages||1)*100)); document.getElementById("pct").textContent=pct+"%"; document.getElementById("range").value=Math.min(p,cur.totalPages||p); }
 async function doSave(forceFinished){ if(!uid) return; const cur=activeRateBook(); if(!cur) return; const errEl=document.getElementById("err"); errEl.textContent=""; const savedEl=document.getElementById("saved"); const rating=state.myRating, progress=parseInt(document.getElementById("pages").value)||0, finished=forceFinished||document.getElementById("finished").checked, review=document.getElementById("review").value.trim(), name=(document.getElementById("my-name").value||"").trim()||memberName(); state.myName=name; try{ await ensureMember(name); await saveRecord(cur.id,{rating:rating||null,progress:progress,finished:finished,review:review||null,started_at:state.existingStartedAt||new Date().toISOString()}); savedEl.classList.add("show"); setTimeout(function(){ savedEl.classList.remove("show"); },1600); refreshCurrent(); renderPast(); }catch(e){ errEl.textContent="Could not save: "+(e.message||"try again"); } }
+document.getElementById("save").addEventListener("click", function(){doSave();});
 (function(){ const sel=document.getElementById("rate-book-select"); if(sel) sel.addEventListener("change", function(){ state.activeRateBookId=sel.value||null; loadRatePanel(state.activeRateBookId); }); })();
 function renderPast(){ const grid=document.getElementById("past-grid"); grid.innerHTML=""; const list=(BOOKS&&BOOKS.pastBooks)||[]; if(!list.length){ grid.innerHTML='<div class="empty">No past books yet.</div>'; return; } list.forEach(async function(b){ const card=document.createElement("div"); card.className="past-card"; card.innerHTML='<img alt="'+esc(b.title)+' cover"><h3>'+esc(b.title)+'</h3><div class="author">'+esc(b.author)+'</div><div class="grp"><span class="stars static" data-stars></span><span class="num"></span> <span class="count"></span></div>'+(uid?'<button class="btn btn-ghost btn-sm rate-this-btn" data-rate="'+esc(b.id)+'">⭐ Rate / update</button>':''); grid.appendChild(card); setCover(card.querySelector("img"), b); const rb=card.querySelector("[data-rate]"); if(rb) rb.addEventListener("click", function(){ state.activeRateBookId=b.id; activate("rate"); }); try{ const recs=await getAllForBook(b.id); const a=aggregate(recs); renderStarsStatic(card.querySelector("[data-stars]"), a.avg); card.querySelector(".num").textContent=a.avg?a.avg.toFixed(1):"—"; card.querySelector(".count").textContent=a.ratedCount?"("+a.ratedCount+")":""; }catch(e){} }); }
 
